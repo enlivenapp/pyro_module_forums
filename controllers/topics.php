@@ -34,6 +34,12 @@ class Topics extends Public_Controller {
   public function __construct() {
     parent::__construct();
 
+
+        if (!is_logged_in())
+    {
+      redirect(site_url() . 'users/login');
+    }
+
     // Load dependencies
     $this->load->models(array('forums_m', 'forum_posts_m', 'forum_subscriptions_m'));
     $this->load->helper('smiley');

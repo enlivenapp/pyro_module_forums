@@ -28,7 +28,7 @@
             <td width="50%">{{ helper:date format="D M j Y - g:i a" timestamp="<?php echo $post->created_on ?>"}}</td>
                 <?php if($post->parent_id == 0): ?>
             <td width="30%" class="postreport">
-	<!--	[ <?php echo anchor('forums/posts/report/'.$post->id, 'Report');?> ] -->
+		[ <?php echo anchor('forums/posts/report/'.$post->id, 'Report');?> ]
                         <?php if($this->ion_auth->is_admin() && !$topic->sticky): ?>
 		[ <?php echo anchor('forums/topics/stick/'.$post->id, 'Make Sticky');?> ]
                         <?php elseif($this->ion_auth->is_admin() && $topic->sticky == 1): ?>
@@ -36,14 +36,18 @@
                         <?php endif; ?>
             </td>
                 <?php else: ?>
-            <td width="35%" class="postreport"><!-- [ <?php echo anchor('forums/posts/report/'.$post->id, 'Report');?> ] --> [ <?php echo anchor('forums/posts/view_reply/'.$post->id, '# '.$i , array('title' => 'Permalink to this post', 'name' => $post->id));?> ]</td>
+            <td width="35%" class="postreport"> [ <?php echo anchor('forums/posts/report/'.$post->id, 'Report');?> ] [ <?php echo anchor('forums/posts/view_reply/'.$post->id, '# '.$i , array('title' => 'Permalink to this post', 'name' => $post->id));?> ]</td>
                 <?php endif; ?>
         </tr>
 
         <tr>
             <td valign="top" class="authorinfo">
                 <a href="<?php echo site_url('user/'.$post->author->id); ?>">
-                        <?php echo gravatar($post->author->email);?>
+                        
+                        {{ user:profile user_id="<?php echo $post->author->id ?>" }}
+                        {{ if avatar }}{{ avatar:img }} {{ else }}  <?php echo gravatar($post->author->email); ?>{{ endif }}
+                        {{ /user:profile }}
+
                 </a>
 
                 <p>
@@ -59,9 +63,9 @@
 
         <tr class="postlinks">
             <td>
-                <!--<?php if(isset($user->id)): ?>
+                <?php if(isset($user->id)): ?>
 		[ <?php echo anchor('messages/create/'.$post->author->id, 'Message');?> ]
-                    <?php endif; ?>-->
+                    <?php endif; ?>
             </td>
 
             <td colspan="2" align="right">[ <?php echo anchor('forums/posts/quote_reply/'.$post->id, 'Quote');?> ]

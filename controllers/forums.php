@@ -4,6 +4,12 @@ class Forums extends Public_Controller {
   function __construct()
   {
     parent::__construct();
+
+
+        if (!is_logged_in())
+    {
+      redirect(site_url() . 'users/login');
+    }
 			
     $this->load->model('forums_m');
     $this->load->model('forum_categories_m');
@@ -23,6 +29,7 @@ class Forums extends Public_Controller {
 		$this->template->append_js('module::forums.js');
 
     $this->template->set_breadcrumb('Home', '/');
+
   }
 	
 	
@@ -101,6 +108,7 @@ class Forums extends Public_Controller {
     $this->forum_subscriptions_m->delete_by(array('user_id' => $user_id, 'topic_id' => $topic_id));
     $data->topic =& $topic;
     $this->template->build('posts/unsubscribe', $data);
+
   }
 
 }

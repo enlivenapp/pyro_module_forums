@@ -35,6 +35,12 @@ class Posts extends Public_Controller {
   {
     parent::__construct();
 
+
+        if (!is_logged_in())
+    {
+      redirect(site_url() . 'users/login');
+    }
+
     // Load dependencies
     $this->load->models(array('forums_m', 'forum_posts_m', 'forum_subscriptions_m'));
     $this->load->helper('smiley');
@@ -417,8 +423,29 @@ class Posts extends Public_Controller {
 
   public function report($reply_id)
   {
-	  $this->session->set_flashdata('message', 'This function is currently unavailable.');
-		redirect('forums/topics/view/' . $reply_id);
+    // Get the reply
+    $reply = $this->forum_posts_m->get($reply_id);
+
+    // Send notifications
+    if (!$this->forums_lib->notify_report($reply))
+    {
+      $this->session->set_flashdata('error', 'Sorry, there was an error.  Please try again.');
+    }
+    else
+    {
+      $this->session->set_flashdata('success', 'Thank you for reporting this post.  We will review it and act on it according to our Terms of Use/Privacy Policy.');
+    }
+
+	  
+
+    if ($reply->parent_id == 0)
+    {
+      redirect('forums/topics/view/' . $reply_id);
+    }
+		else
+    {
+      redirect('forums/topics/view/' . $reply->parent_id . '#' . $reply_id);
+    }
   }
 
 

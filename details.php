@@ -2,7 +2,7 @@
 
 class Module_Forums extends Module {
 
-    public $version = '1.5.0';
+    public $version = '1.5.1';
 
     public function info() {
       return array(

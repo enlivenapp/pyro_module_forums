@@ -14,6 +14,47 @@ class Forums_lib
     $this->CI =& get_instance();
   }
 
+
+  public function notify_report($reply)
+  {
+    //return false;
+
+    $this->CI->load->library('email');
+    $this->CI->load->helper('url');
+
+    if ($reply->parent_id == 0)
+    {
+      $text_body = '<b>Reported Post:</b> ' . anchor('forums/topics/view/' . $reply->id) . '<br /><br />';
+    }
+    else
+    {
+      $text_body = '<b>Reported Post:</b> ' . anchor('forums/topics/view/' . $reply->parent_id . '#' . $reply->id) . '<br /><br />';
+    }
+
+    $text_body .= "Reported by: " . $this->CI->current_user->display_name . " (" . $this->CI->current_user->id . ")<br /><br />";
+
+    $text_body .= '<strong>Post contents:</strong><br />';
+    $text_body .= parse($reply->content);
+
+
+  
+    $this->CI->email->clear();
+    $this->CI->email->from(Settings::get('server_email'), Settings::get('site_name') . " - " . $this->CI->config->item('forums_title'));
+    $this->CI->email->to(Settings::get('contact_email'));
+  
+    $this->CI->email->subject('Forum Post Reported');
+    $text_body = 'Post reported on Forums. <b>Action Required</b><br /><br />' . $text_body;
+  
+    $this->CI->email->message($text_body);
+    $this->CI->email->send();
+
+
+    return true;
+
+  }
+
+
+
   public function notify_reply($recipients, $reply)
   {
     $this->CI->load->library('email');
