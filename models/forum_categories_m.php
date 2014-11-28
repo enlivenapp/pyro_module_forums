@@ -1,11 +1,8 @@
 <?php if (!defined('BASEPATH')) exit('No direct script access allowed');
 
-class Forum_categories_m extends MY_Model
-{
-  protected $_table = 'forum_categories';
+class Forum_categories_m extends ForumsBase_m {
 
-  public function __construct() {
-    parent::__construct();
-  }
+	protected $_table = 'categories';
+	protected $_stream = 'categories';
+
 }
-?>
