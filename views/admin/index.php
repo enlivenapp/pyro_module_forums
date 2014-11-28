@@ -3,10 +3,9 @@
 </section>
 
 <section class="item">
+  <div class="content">
   <?php echo form_open('admin/forums');?>
-  <div class="box">
-    <div class="box-container">
-      
+     
       <?php if (!empty($categories)): ?>
    
       <table border="0" class="table-list">
@@ -43,8 +42,6 @@
       <?php else: ?>
       <p><?php echo lang('forums_no_categories');?></p>
       <?php endif; ?>
-    </div>
-  </div>
-  
   <?php echo form_close();?>
+  </div>
 </section>
