@@ -6,44 +6,41 @@ class Module_Forums extends Module {
 
     public function info() {
       return array(
-		   'name'      	=> array(
-					 'en' => 'Forums',
-					 ),
-		   'description' => array(
-					  'en' => 'The forum for your site',
-					  ),
+		    'name' => array(
+				    'en' => 'Forums',
+				),
+		    'description' => array(
+				  'en' => 'The forum for your site',
+				),
 
-		   'frontend'	=> TRUE,
-		   'backend'	=> TRUE,
-		   'menu'	=> 'content',
+		    'frontend'	=> TRUE,
+		    'backend'	=> TRUE,
+		    'menu'	=> 'content',
 
-		   'sections'	=> array(
-					 'admin' => array(
-							  'name' => 'forums_forum_label',
-							  'uri' => 'admin/forums',
-							  'shortcuts'	=> array(
-										 
-										 array('name'	=> 'forums_category_title',
-										       'uri'	=> 'admin/forums',
-										       'class'	=> 'list'),
-
-										 array('name'	=> 'forums_create_category_title',
-										       'uri'	=> 'admin/forums/create_category',
-										       'class'	=> 'add'),
-
-										 array('name'	=> 'forums_list_forum_title',
-										       'uri'	=> 'admin/forums/list_forums',
-										       'class'	=> 'list'),
-
-										 array('name'	=> 'forums_create_forum_title',
-										       'uri'	=> 'admin/forums/create_forum',
-										       'class'	=> 'add'),
-										 
-										 ),
-							  
-							  ),
-					 ),
-		   );
+		    'sections'	=> array(
+          'forums' => array(
+            'name' => 'forums_forum_label',
+            'uri' => 'admin/forums/list_forums',
+            'shortcuts' => array(
+              array(
+                'name' => 'forums_create_forum_title',
+                'uri'  => 'admin/forums/create_forum',
+                'class'  => 'add'
+              ),
+            ),
+          ),
+					'categories' => array(
+					  'name' => 'forums_category_title',
+            'uri' => 'admin/forums/index',
+						'shortcuts'	=> array(
+						  array('name'	=> 'forums_create_category_title',
+						    'uri'	=> 'admin/forums/create_category',
+								'class'	=> 'add'
+							),
+            ),
+					),
+		    )
+      );
     }
 
     public function install() {

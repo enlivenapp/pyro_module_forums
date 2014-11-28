@@ -7,9 +7,7 @@
 </section>
 
 <section class="item">
-  <div class="box">
-    <div class="box-container">
-      
+  <div class="content">
       <?php echo form_open($this->uri->uri_string(), 'class="crud"', array('id' => $category->id)); ?>
       
       <ol>
@@ -28,6 +26,5 @@
       </div>
       <?php echo form_close(); ?>
       
-    </div>
   </div>
 </section>

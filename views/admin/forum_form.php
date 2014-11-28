@@ -7,8 +7,7 @@
 </section>
 
 <section class="item">
-  <div class="box">
-    <div class="box-container">
+  <div class="content">
       <?php
          if(empty($forum->categories)):
       echo lang('forums_no_categories');
@@ -43,7 +42,5 @@
          echo form_close();
          endif;
          ?>
-      
-    </div>
   </div>
 </section>

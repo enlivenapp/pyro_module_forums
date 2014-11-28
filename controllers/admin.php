@@ -83,6 +83,7 @@ class Admin extends Admin_Controller {
    * @return	void
    */
   public function index() {
+    $this->template->active_section = 'categories';
     $categories = $this->forum_categories_m->get_all();
 
     $data->categories = &$categories;
@@ -99,6 +100,7 @@ class Admin extends Admin_Controller {
    * @return	void
    */
   public function list_forums() {
+    $this->template->active_section = 'forums';
     $this->db->select('forums.id, forums.title, forum_categories.title as category');
     $this->db->join('forum_categories', 'forums.category_id = forum_categories.id');
     $this->db->order_by('category', 'ASC');
@@ -120,6 +122,7 @@ class Admin extends Admin_Controller {
    * @return	void
    */
   public function create_category() {
+    $this->template->active_section = 'categories';
     $this->load->library('form_validation');
     $this->form_validation->set_rules($this->rules['category']);
 		$category  = new stdClass();
@@ -148,6 +151,7 @@ class Admin extends Admin_Controller {
    * @return void
    */
   public function edit_category($id) {
+    $this->template->active_section = 'categories';
     $this->load->library('form_validation');
     $this->form_validation->set_rules($this->rules['category']);
 
@@ -177,6 +181,7 @@ class Admin extends Admin_Controller {
    * @return	void
    */
   public function create_forum() {
+    $this->template->active_section = 'forums';
     $this->load->library('form_validation');
     $this->form_validation->set_rules($this->rules['forum']);
 		$forum = new stdClass();
@@ -211,6 +216,7 @@ class Admin extends Admin_Controller {
    * @return	void
    */
   public function edit_forum($id) {
+    $this->template->active_section = 'forums';
     $this->load->library('form_validation');
     $this->form_validation->set_rules($this->rules['forum']);
 
