@@ -1,6 +1,6 @@
 <?php
-class Forum_posts_m extends ForumsBase_m {
-    
+class Posts_m extends ForumsBase_m {
+
     protected $_table = 'posts';
     protected $_stream = 'posts';
 

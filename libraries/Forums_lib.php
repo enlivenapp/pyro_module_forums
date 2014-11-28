@@ -14,7 +14,6 @@ class Forums_lib
     $this->CI =& get_instance();
   }
 
-
   public function notify_report($reply)
   {
     //return false;

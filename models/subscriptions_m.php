@@ -1,6 +1,6 @@
 <?php
 
-class Forum_subscriptions_m extends ForumsBase_m {
+class Subscriptions_m extends ForumsBase_m {
 
     protected $_table = 'subscriptions';
     protected $_stream = 'subscriptions';

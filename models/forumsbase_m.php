@@ -12,6 +12,16 @@ class ForumsBase_m extends MY_Model {
 		$this->_table = $this->_stream_prefix . $this->_table;
 	}
 
+	public function stream_slug()
+	{
+		return $this->_stream;
+	}
+
+	public function namespace_slug()
+	{
+		return $this->_stream_namespace;
+	}
+
  	public function get_entries($stream_params = array())
  	{
 		// unset accidentially set stream and namespace params

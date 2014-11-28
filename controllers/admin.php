@@ -1,276 +1,230 @@
 <?php  if (!defined('BASEPATH')) exit('No direct script access allowed');
 /**
- * PyroCMS
- *
- * An open source CMS based on CodeIgniter
- *
- * @package		PyroCMS
- * @author		Prajwol Shrestha
- * @license		Apache License v1.0
- * @link		http://semicolondev.com
- * @since		Version 0.9.8-rc2
- * @filesource
- */
+* PyroCMS
+*
+* An open source CMS based on CodeIgniter
+*
+* @package		PyroCMS
+* @author		Prajwol Shrestha
+* @license		Apache License v1.0
+* @link		http://semicolondev.com
+* @since		Version 0.9.8-rc2
+* @filesource
+*/
 
 /**
- * PyroCMS Forums Admin Controller
- *
- * Provides an admin for the forums module.
- *
- * @author		Prajwol Shrestha <prajwols@semicolodev.com>
- * @package		PyroCMS
- * @subpackage	Forums
- */
+* PyroCMS Forums Admin Controller
+*
+* Provides an admin for the forums module.
+*
+* @author		Prajwol Shrestha <prajwols@semicolodev.com>
+* @package		PyroCMS
+* @subpackage	Forums
+*/
+
 class Admin extends Admin_Controller {
 
-  protected $section	= 'admin';
+    public function __construct()
+    {
+        parent::__construct();
 
-  /**
-   * @access	private
-   * @var		array	Contains form validation rules.
-   */
-  private $rules = array(
-			 'category' => array (
-					      array (
-						     'field'   => 'title',
-						     'label'   => 'Title',
-						     'rules'   => 'trim|xss_clean|required|max_length[100]'
-						     )
-					      ),
-			 'forum' => array (
-					   array (
-						  'field'   => 'title',
-						  'label'   => 'Title',
-						  'rules'   => 'trim|xss_clean|required|max_length[100]'
-						  ),
-					   array (
-						  'field'   => 'description',
-						  'label'   => 'Description',
-						  'rules'   => 'trim|xss_clean|required|max_length[255]'
-						  )
-					   )
-			 );
-
-  /**
-   * Constructor
-   *
-   * Loads dependencies.
-   *
-   * @access	public
-   * @return	void
-   */
-  public function __construct() {
-    parent::__construct();
-
-    $this->load->model('forums_m');
-    $this->load->model('forum_categories_m');
-    $this->lang->load('forums');
-
-    if(!Settings::get('forums_editor')) {
-      $this->forums_m->add_setting();
+        $this->lang->load('forums');
+        $this->load->model('forumsbase_m');
+        $this->load->driver('Streams');
     }
 
-    $this->template
-      ->set_partial('shortcuts', 'admin/partials/shortcuts');
-  }
+    /**
+    * Index
+    *
+    * Lists categories.
+    *
+    * @access	public
+    * @return	void
+    */
+    public function index()
+    {
+        $this->template->active_section = 'categories';
 
-  /**
-   * Index
-   *
-   * Lists categories.
-   *
-   * @access	public
-   * @return	void
-   */
-  public function index() {
-    $this->template->active_section = 'categories';
-    $categories = $this->forum_categories_m->get_all();
+        $this->load->model('categories_m');
+        $extra = array(
+            'columns' => array('title', 'created_by', 'created'),
+            'title' => 'lang:forums:categories',
+            'buttons' => array(
+                array(
+                    'label'     => lang('global:edit'),
+                    'url'       => 'admin/forums/edit_category/-entry_id-'
+                ),
+                array(
+                    'label'     => lang('global:delete'),
+                    'url'       => 'admin/forums/delete/category/-entry_id-',
+                    'confirm'   => true
+                )
+            ),
+            $extra['filters'] = array(
+                'title'
+            )
+        );
 
-    $data->categories = &$categories;
-
-    $this->template->build('admin/index', $data);
-  }
-
-  /**
-   * List Forums
-   *
-   * Lists all the forums.
-   *
-   * @access	public
-   * @return	void
-   */
-  public function list_forums() {
-    $this->template->active_section = 'forums';
-    $this->db->select('forums.id, forums.title, forum_categories.title as category');
-    $this->db->join('forum_categories', 'forums.category_id = forum_categories.id');
-    $this->db->order_by('category', 'ASC');
-    $forums = $this->forums_m->get_all();
-
-    $data->forums = &$forums;
-
-    $this->template->build('admin/forums', $data);
-  }
-
-  /**
-   * Create Category
-   *
-   * Displays a form to create a category.
-   * Creates the category if it passes form validation.
-   *
-   * @todo	Check for duplicate categories.
-   * @access	public
-   * @return	void
-   */
-  public function create_category() {
-    $this->template->active_section = 'categories';
-    $this->load->library('form_validation');
-    $this->form_validation->set_rules($this->rules['category']);
-		$category  = new stdClass();
-    $category->id = 0;
-    $category->title = set_value('title');
-
-    if ($this->form_validation->run()) {
-      if($this->forum_categories_m->insert(array('title' => $this->input->post('title')))) {
-	$this->session->set_flashdata('success', sprintf($this->lang->line('forums_category_add_success'), $this->input->post('title')));
-	redirect('/admin/forums');
-      }
-
+        $this->streams->cp->entries_table($this->categories_m->stream_slug(), $this->categories_m->namespace_slug(), null, null, true, $extra);
     }
 
-    $data->category =& $category;
-    $this->template->build('admin/category_form', $data);
+    /**
+    * List Forums
+    *
+    * Lists all the forums.
+    *
+    * @access	public
+    * @return	void
+    */
+    public function list_forums()
+    {
+        $this->template->active_section = 'forums';
+
+        $this->load->model('forums_m');
+
+        $extra = array(
+            'columns' => array('title', 'description', 'category_id', 'created_by', 'created'),
+            'title' => 'lang:forums:categories',
+            'buttons' => array(
+                array(
+                    'label'     => lang('global:edit'),
+                    'url'       => 'admin/forums/edit_forum/-entry_id-'
+                ),
+                array(
+                    'label'     => lang('global:delete'),
+                    'url'       => 'admin/forums/delete/forum/-entry_id-',
+                    'confirm'   => true
+                )
+            ),
+            $extra['filters'] = array(
+                'title'
+            )
+        );
+
+        $this->streams->cp->entries_table($this->forums_m->stream_slug(), $this->forums_m->namespace_slug(), null, null, true, $extra);
   }
 
-  /**
-   * Edit Category
-   *
-   * Allows admins to edit a category
-   *
-   * @param	int	The id of the category to edit.
-   * @access	public
-   * @return void
-   */
-  public function edit_category($id) {
-    $this->template->active_section = 'categories';
-    $this->load->library('form_validation');
-    $this->form_validation->set_rules($this->rules['category']);
+    /**
+    * Create Category
+    *
+    * Displays a form to create a category.
+    * Creates the category if it passes form validation.
+    *
+    * @todo	Check for duplicate categories.
+    * @access	public
+    * @return	void
+    */
+    public function create_category()
+    {
+        $this->load->model('categories_m');
 
-    $category = $this->forum_categories_m->get($id);
+        $extra = array(
+            'return' => 'admin/forums/index'
+        );
 
-    if ($this->form_validation->run()) {
-
-      if($this->forum_categories_m->update($this->input->post('id'), array('title' => $this->input->post('title')))) {
-	$this->session->set_flashdata('success', sprintf($this->lang->line('forums_category_edit_success'), $this->input->post('title')));
-	redirect('/admin/forums');
-      }
-      $category->title = set_value('title');
+        $this->streams->cp->entry_form($this->categories_m->stream_slug(), $this->categories_m->namespace_slug(), 'new', null, true, $extra);
     }
 
-    $data->category =& $category;
-    $this->template->build('admin/category_form', $data);
-  }
+    /**
+    * Edit Category
+    *
+    * Allows admins to edit a category
+    *
+    * @param	int	The id of the category to edit.
+    * @access	public
+    * @return void
+    */
+    public function edit_category($id) {
+        $this->load->model('categories_m');
 
-  /**
-   * Create Forum
-   *
-   * Displays a form to create a forum.
-   * Creates the forum if it passes form validation.
-   *
-   * @todo	Check for duplicate forums.
-   * @access	public
-   * @return	void
-   */
-  public function create_forum() {
-    $this->template->active_section = 'forums';
-    $this->load->library('form_validation');
-    $this->form_validation->set_rules($this->rules['forum']);
-		$forum = new stdClass();
-    $forum->id = 0;
-    $forum->title = set_value('title');
-    $forum->description = set_value('title');
-    $forum->category = set_value('category');
+        $extra = array(
+            'return' => 'admin/forums/index'
+        );
 
-    $cats = $this->forum_categories_m->get_all();
-    foreach($cats as $cat) {
-      $forum->categories[$cat->id] = $cat->title;
-    }
-    if ($this->form_validation->run()) {
-      if($this->forums_m->insert(array('title' => $this->input->post('title'), 'description' => $this->input->post('description'), 'category_id' => $this->input->post('category')))) {
-	$this->session->set_flashdata('success', sprintf($this->lang->line('forums_forum_add_success'), $this->input->post('title')));
-	redirect('/admin/forums/list_forums');
-      }
-
+        $this->streams->cp->entry_form($this->categories_m->stream_slug(), $this->categories_m->namespace_slug(), 'edit', $id, true, $extra);
     }
 
-    $data->forum =& $forum;
-    $this->template->build('admin/forum_form', $data);
-  }
+    /**
+    * Create Forum
+    *
+    * Displays a form to create a forum.
+    * Creates the forum if it passes form validation.
+    *
+    * @todo	Check for duplicate forums.
+    * @access	public
+    * @return	void
+    */
+    public function create_forum() {
+        $this->load->model('forums_m');
 
-  /**
-   * Edit Forum
-   *
-   * Allows admins to edit forums.
-   *
-   * @param	int	The id of the forum to edit.
-   * @access	public
-   * @return	void
-   */
-  public function edit_forum($id) {
-    $this->template->active_section = 'forums';
-    $this->load->library('form_validation');
-    $this->form_validation->set_rules($this->rules['forum']);
+        $extra = array(
+            'return' => 'admin/forums/list_forums'
+        );
 
-    $forum = $this->forums_m->get($id);
-
-    $cats = $this->forum_categories_m->get_all();
-    foreach($cats as $cat) {
-      $forum->categories[$cat->id] = $cat->title;
+        $this->streams->cp->entry_form($this->forums_m->stream_slug(), $this->forums_m->namespace_slug(), 'new', null, true, $extra);
     }
 
-    if ($this->form_validation->run()) {
-      if($this->forums_m->update($this->input->post('id'), array('title' => $this->input->post('title'), 'description' => $this->input->post('description'), 'category_id' => $this->input->post('category')))) {
-	$this->session->set_flashdata('success', sprintf($this->lang->line('forums_forum_add_success'), $this->input->post('title')));
-	redirect('/admin/forums/list_forums');
-      }
-      $forum->title = set_value('title');
-      $forum->description = set_value('description');
-      $forum->category = set_value('category');
+    /**
+    * Edit Forum
+    *
+    * Allows admins to edit forums.
+    *
+    * @param	int	The id of the forum to edit.
+    * @access	public
+    * @return	void
+    */
+    public function edit_forum($id) {
+        $this->load->model('forums_m');
+
+        $extra = array(
+            'return' => 'admin/forums/list_forums'
+        );
+
+        $this->streams->cp->entry_form($this->forums_m->stream_slug(), $this->forums_m->namespace_slug(), 'edit', $id, true, $extra);
     }
-    $forum->category = $forum->category_id;
-    $data->forum =& $forum;
-    $this->template->build('admin/forum_form', $data);
-  }
 
-  /**
-   * Delete
-   *
-   * This deletes both categories and forums (based on $type).
-   * It recursivly deletes all children.
-   *
-   * @param	string	The type of item to delete.
-   * @param	int		The id of the category or forum to delete.
-   * @access	public
-   * @return	void
-   */
-  public function delete($type, $id) {
-    switch ($type) {
-      // Delete the category
-    case 'category':
-      $this->load->model('forum_posts_m');
-      $this->load->model('forum_subscriptions_m');
+    /**
+    * Delete
+    *
+    * This deletes both categories and forums (based on $type).
+    * It recursivly deletes all children.
+    *
+    * @param	string	The type of item to delete.
+    * @param	int		The id of the category or forum to delete.
+    * @access	public
+    * @return	void
+    */
+    public function delete($type, $id) {
+        switch ($type) {
+            // Delete the category
+            case 'category':
+                $this->load->model('posts_m');
+                $this->load->model('subscriptions_m');
 
-      // Delete the category
-      $this->forum_categories_m->delete($id);
+                // delete the category
+                $this->categories_m->delete($id);
 
-      // Loop through all the forums in the category
-      foreach($this->forums_m->get_many_by('category_id =', $id) as $forum) {
-	// Loop through all the topics in the forum
-	foreach($this->forum_posts_m->get_many_by(array('forum_id' => $forum->id, 'parent_id' => '0')) as $topic) {
-	  // Delete the subscriptions to the topic
-	  $this->forum_subscriptions_m->delete_by('topic_id', $topic->id);
-	}
-	// Delete all the topics and replies
-	$this->forum_posts_m->delete_by('forum_id', $forum->id);
+                // delete all related forums
+                $this->forums_m->delete_forums_by_category($id);
+
+                $forums = $this->forums_m->get_by_category($id);
+                
+                foreach($forums['entries'] as $forum)
+                {
+                    $topics = $this->posts_m->get_topics_by_forum($forum['id']);
+                    $
+
+                    foreach($topics as $topic)
+                    {
+
+                    }
+                    // Loop through all the topics in the forum
+                    foreach($this->forum_posts_m->get_many_by(array('forum_id' => $forum->id, 'parent_id' => '0')) as $topic) {
+      // Delete the subscriptions to the topic
+      $this->forum_subscriptions_m->delete_by('topic_id', $topic->id);
+    }
+    // Delete all the topics and replies
+    $this->forum_posts_m->delete_by('forum_id', $forum->id);
       }
 
       // Delete all the forums
@@ -290,8 +244,8 @@ class Admin extends Admin_Controller {
 
       // Loop through all the topics in the forum
       foreach($this->forum_posts_m->get_many_by(array('forum_id' => $id, 'parent_id' => '0')) as $topic) {
-	// Delete the subscriptions to the topic
-	$this->forum_subscriptions_m->delete_by('topic_id', $topic->id);
+    // Delete the subscriptions to the topic
+    $this->forum_subscriptions_m->delete_by('topic_id', $topic->id);
       }
 
       // Delete all the topics
@@ -304,6 +258,6 @@ class Admin extends Admin_Controller {
     default:
       break;
     }
-  }
+    }
 }
 ?>
