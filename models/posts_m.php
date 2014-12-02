@@ -49,7 +49,7 @@ class Posts_m extends ForumsBase_m {
     */
     public function count_posts_in_topic($topic_id)
     {
-        return $this->where('id', $topic_id)->or_where('parent_id', $topic_id)->count_all_results();
+        return $this->where('id', $topic_id)->or_where('parent_id', $topic_id)->count_all();
     }
 
     /**
@@ -80,7 +80,7 @@ class Posts_m extends ForumsBase_m {
     */
     public function count_prior_posts($topic_id, $reply_time)
     {
-        return $this->count_by(array('parent_id' => $topic_id, 'created_on <' => $reply_time)) + 1;
+        return $this->count_by(array('parent_id' => $topic_id, 'created <' => $reply_time)) + 1;
     }
 
     /**
@@ -115,11 +115,12 @@ class Posts_m extends ForumsBase_m {
         return $this->get_entries(
             array(
                 'where' => $this->db->protect_identifiers('id') . ' = ' . $this->db->escape($topic_id) . ' OR ' . $this->db->protect_identifiers('parent_id') . ' = ' . $this->db->escape($topic_id),
-                'sort' => 'created_on',
+                'order_by' => 'created',
+                'sort' => 'asc',
                 'paginate' => 'yes',
                 'offset' => $offset,
                 'limit' => $per_page
-            ),
+            )
         );
     }
 
@@ -139,6 +140,8 @@ class Posts_m extends ForumsBase_m {
             array(
                 'where' => $this->db->protect_identifiers('forum_id') . ' = ' . $this->db->escape($forum_id) . ' OR ' . $this->db->protect_identifiers('parent_id') . ' = 0',
                 'paginate' => 'yes',
+                'order_by' => 'created',
+                'sort' => 'asc',
                 'offset' => $offset,
                 'limit' => $per_page
             )
@@ -149,18 +152,23 @@ class Posts_m extends ForumsBase_m {
 
         $sticky = array();
         $updated_on = array();
-        $created_on = array();
+        $created = array();
 
         foreach($entries['entries'] as $key => $post)
         {
            $sticky[$key] = $post['is_sticky'];
            $updated_on[$key] = $post['updated_on'];
-           $created_on[$key] = $post['created_on'];
+           $created[$key] = $post['created'];
         }
 
-        array_multisort($sticky, SORT_DESC, $updated_on, SORT_DESC, $created_on, SORT_DESC, $entries['entries']);
+        array_multisort($sticky, SORT_DESC, $updated_on, SORT_DESC, $created, SORT_DESC, $entries['entries']);
 
         return $entries;
+    }
+
+    public function delete_by_forum($id)
+    {
+        return $this->delete_by('forum_id', $id);
     }
 
     /**
@@ -177,10 +185,15 @@ class Posts_m extends ForumsBase_m {
         $latest_post = $this->db
                         ->select('id', 'parent_id')
                         ->where( $this->table_name() . '.forum_id', $forum_id)
-                        ->order_by( $this->table_name() . '.created_on DESC')
+                        ->order_by( $this->table_name() . '.created DESC')
                         ->limit(1)
                         ->get($this->table_name())
                         ->row();
+
+        if( empty($latest_post) OR ! $latest_post->id )
+        {
+            return null;
+        }
 
         $post_id = $latest_post->parent_id == 0 ? $latest_post->id : $latest_post->parent_id;
 
@@ -201,8 +214,8 @@ class Posts_m extends ForumsBase_m {
     {
         $latest_topic =  $this->db
                             ->select('id')
-                            ->or_where(array('id' => $topic_id, 'parent_id' => $topic_id));
-                            ->order_by('created_on DESC');
+                            ->or_where(array('id' => $topic_id, 'parent_id' => $topic_id))
+                            ->order_by('created DESC')
                             ->limit(1)
                             ->get('forum_posts')
                             ->row();
@@ -245,22 +258,26 @@ class Posts_m extends ForumsBase_m {
         return $this->get_entry($topic_id, false);
     }
 
-/*
+    function set_topic_update($topic_id)
+    {
+        return $this->update_by($topic_id, array('updated' => date('Y-m-d H:s:i', time())));
+    }
+
     function new_topic($user_id, $topic, $forum)
     {
         $this->load->helper('date');
 
         $insert = array(
         	    'forum_id' 		=> $forum->id,
-        	    'author_id' 	=> $user_id,
+        	    'created_by' 	=> $user_id,
         	    'parent_id' 	=> 0,
         	    'title' 		=> $topic->title,
         	    'content' 			=> $topic->content,
-        	    'created_on' 	=> now(),
+        	    'created' 	=> date('Y-m-d H:s:i', time()),
         	    'view_count' 	=> 0,
         	    );
         	
-        $this->db->insert('forum_posts', $insert);
+        $this->db->insert($this->table_name(), $insert);
         	
         return $this->db->insert_id();
     }
@@ -271,19 +288,18 @@ class Posts_m extends ForumsBase_m {
 
     $insert = array(
 		    'forum_id' 		=> $topic->forum_id,
-		    'author_id' 	=> $user_id,
+		    'created_by' 	=> $user_id,
 		    'parent_id' 	=> $topic->id,
 		    'title' 		=> '',
 		    'content'		=> $reply->content,
-		    'created_on' 	=> now(),
+		    'created' 	=> date('Y-m-d H:s:i', time()),
 		    'view_count' 	=> 0,
 		    );
 		
-    $this->db->insert('forum_posts', $insert);
+    $this->db->insert($this->table_name(), $insert);
 
     return $this->db->insert_id();
   }
-*/
 	
     // again: how should the caller know that this is a reply?
     function get_reply($reply_id = 0)

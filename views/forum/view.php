@@ -19,14 +19,14 @@
 
     <tbody>
 
-        <?php if(empty($forum->topics)):?>
+        <?php if($forum->topics['total'] == 0):?>
         <tr>
             <td colspan="5" align="center">There are no posts in this topic right now.</td>
         </tr>
 
         <?php else: ?>
 
-            <?php foreach($forum->topics as $topic): ?>
+            <?php foreach($forum->topics['entries'] as $topic): ?>
         <tr>
             <td class="forum_icon">
                         <?php echo $topic->sticky ? Asset::img('module::pin.png', 'forums') : Asset::img('module::folder.png', 'forums'); ?>

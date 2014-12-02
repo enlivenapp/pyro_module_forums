@@ -195,69 +195,49 @@ class Admin extends Admin_Controller {
     * @return	void
     */
     public function delete($type, $id) {
+
+        $this->load->library('forums_lib');
+
         switch ($type) {
-            // Delete the category
+            // Delete the category, all related forums and its posts
             case 'category':
-                $this->load->model('posts_m');
-                $this->load->model('subscriptions_m');
-
-                // delete the category
-                $this->categories_m->delete($id);
-
-                // delete all related forums
-                $this->forums_m->delete_forums_by_category($id);
-
-                $forums = $this->forums_m->get_by_category($id);
+                // delete a category and everything in ti
+                if( $this->forums_lib->delete_category($id) ) {
+                    // yay
+                    $this->session->set_flashdata('success', $this->lang->line('forums_category_delete_success'));    
+                } else {
+                    // nay
+                    // TODO: log this failure
+                    $this->session->set_flashdata('error', $this->lang->line('global:error'));    
+                }
                 
-                foreach($forums['entries'] as $forum)
-                {
-                    $topics = $this->posts_m->get_topics_by_forum($forum['id']);
-                    $
+                redirect('/admin/forums');
+            break;
 
-                    foreach($topics as $topic)
-                    {
+            // Delete the forum
+            case 'forum':
+                // delete all the subscriptions on posts of this forum
+                $rv = $this->forums_lib->delete_subscriptions_by_forum($id);
+                // delete all posts
+                $rv = $rv && $this->posts_m->delete_by_forum($id);
+                // Delete the forum
+                $rv = $rv && $this->forums_m->delete($id);
 
-                    }
-                    // Loop through all the topics in the forum
-                    foreach($this->forum_posts_m->get_many_by(array('forum_id' => $forum->id, 'parent_id' => '0')) as $topic) {
-      // Delete the subscriptions to the topic
-      $this->forum_subscriptions_m->delete_by('topic_id', $topic->id);
-    }
-    // Delete all the topics and replies
-    $this->forum_posts_m->delete_by('forum_id', $forum->id);
-      }
+                if($rv) {
+                    // yay
+                    $this->session->set_flashdata('success', $this->lang->line('forums_forum_delete_success'));
+                } else {
+                    // nay
+                    $this->session->set_flashdata('error', $this->lang->line('global:error'));
+                }
+                
+                redirect('/admin/forums/list_forums');
 
-      // Delete all the forums
-      $this->forums_m->delete_by('category_id =', $id);
+            break;
 
-      $this->session->set_flashdata('success', $this->lang->line('forums_category_delete_success'));
-      redirect('/admin/forums');
-      break;
-
-      // Delete the forum
-    case 'forum':
-      $this->load->model('forum_posts_m');
-      $this->load->model('forum_subscriptions_m');
-
-      // Delete the forum
-      $this->forums_m->delete($id);
-
-      // Loop through all the topics in the forum
-      foreach($this->forum_posts_m->get_many_by(array('forum_id' => $id, 'parent_id' => '0')) as $topic) {
-    // Delete the subscriptions to the topic
-    $this->forum_subscriptions_m->delete_by('topic_id', $topic->id);
-      }
-
-      // Delete all the topics
-      $this->forum_posts_m->delete_by('forum_id', $id);
-
-      $this->session->set_flashdata('success', $this->lang->line('forums_forum_delete_success'));
-      redirect('/admin/forums/list_forums');
-      break;
-
-    default:
-      break;
-    }
+            default:
+            break;
+        }
     }
 }
 ?>

@@ -1,42 +1,43 @@
 <?php
 class Forums extends Public_Controller {
 
-  function __construct()
-  {
-    parent::__construct();
-
-
-        if (!is_logged_in())
+    function __construct()
     {
-      redirect(site_url() . 'users/login');
-    }
-			
-    $this->load->model('forums_m');
-    $this->load->model('forum_categories_m');
-    $this->load->model('forum_posts_m');
+        parent::__construct();
 
-    $this->lang->load('forums');
-    $this->load->config('forums');
+        // TODO: settify this, maybe
+        if ( ! is_logged_in())
+        {
+            redirect(site_url() . 'users/login');
+        }
+		
+        $this->load->model('forumsbase_m');
+        $this->load->model('forums_m');
+        $this->load->model('categories_m');
+        $this->load->model('posts_m');
 
-    if(!Settings::get('forums_editor'))
-      {
-	$this->forums_m->add_setting();
-      }
+        $this->lang->load('forums');
+        $this->load->config('forums');
 
-    $this->template->enable_parser_body(FALSE);
+        if(!Settings::get('forums_editor'))
+        {
+	       $this->forums_m->add_setting();
+        }
+
+        $this->template->enable_parser_body(FALSE);
 
 		$this->template->append_css('module::forums.css');
 		$this->template->append_js('module::forums.js');
 
-    $this->template->set_breadcrumb('Home', '/');
+        $this->template->set_breadcrumb('Home', '/');
 
-  }
+    }
 	
 	
-  function index()
-  {
-    if( $forum_categories = $this->forum_categories_m->get_all() )
-      {
+    function index()
+    {
+        if( $forum_categories = $this->categories_m->get_all() )
+        {
 	// Get list of categories
 	foreach($forum_categories as &$category)
 	  {
@@ -45,12 +46,12 @@ class Forums extends Public_Controller {
 	    // Get a list of forums in each category
 	    foreach($category->forums as &$forum)
 	      {
-		$forum->topic_count = $this->forum_posts_m->count_topics_in_forum( $forum->id );
-		$forum->reply_count = $this->forum_posts_m->count_replies_in_forum( $forum->id );
-		$forum->last_post = $this->forum_posts_m->last_forum_post($forum->id);
+		$forum->topic_count = $this->posts_m->count_topics_in_forum( $forum->id );
+		$forum->reply_count = $this->posts_m->count_replies_in_forum( $forum->id );
+		$forum->last_post = $this->posts_m->last_forum_post($forum->id);
 		if(!empty($forum->last_post))
 		  {
-		    $forum->last_post->author = $this->forum_posts_m->author_info($forum->last_post->author_id);
+		    $forum->last_post->author = $this->posts_m->author_info($forum->last_post->author_id);
 		  }
 	      }
 	  }
@@ -69,7 +70,7 @@ class Forums extends Public_Controller {
 
     // Pagination junk
     $per_page = '25';
-    $pagination = create_pagination('forums/view/'.$forum_id, $this->forum_posts_m->count_topics_in_forum($forum_id), $per_page, 4);
+    $pagination = create_pagination('forums/view/'.$forum_id, $this->posts_m->count_topics_in_forum($forum_id), $per_page, 4);
 
     if($offset < $per_page)
       {
@@ -79,17 +80,17 @@ class Forums extends Public_Controller {
     // End Pagination
 
     // Get all topics for this forum
-    $forum->topics = $this->forum_posts_m->get_topics_by_forum($forum_id, $offset, $per_page);
+    $forum->topics = $this->posts_m->get_topics_by_forum($forum_id, $offset, $per_page);
 		
     // Get a list of posts which have no parents (topics) in this forum
-    foreach($forum->topics as &$topic)
+    foreach($forum->topics['entries'] as &$topic)
       {
-	$topic->post_count = $this->forum_posts_m->count_posts_in_topic($topic->id);
-	$topic->last_post = $this->forum_posts_m->last_topic_post($topic->id);
+	$topic->post_count = $this->posts_m->count_posts_in_topic($topic->id);
+	$topic->last_post = $this->posts_m->last_topic_post($topic->id);
 
 	if(!empty($topic->last_post))
 	  {
-	    $topic->last_post->author = $this->forum_posts_m->author_info($topic->last_post->author_id);
+	    $topic->last_post->author = $this->posts_m->author_info($topic->last_post->author_id);
 	  }
       }
 		
@@ -103,8 +104,8 @@ class Forums extends Public_Controller {
 
   function unsubscribe($user_id, $topic_id)
   {
-    $this->load->model('forum_subscriptions_m');
-    $topic = $this->forum_posts_m->get($topic_id);
+    $this->load->model('subscriptions_m');
+    $topic = $this->posts_m->get($topic_id);
     $this->forum_subscriptions_m->delete_by(array('user_id' => $user_id, 'topic_id' => $topic_id));
     $data->topic =& $topic;
     $this->template->build('posts/unsubscribe', $data);
