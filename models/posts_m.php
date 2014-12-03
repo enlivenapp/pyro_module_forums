@@ -49,7 +49,7 @@ class Posts_m extends ForumsBase_m {
     */
     public function count_posts_in_topic($topic_id)
     {
-        return $this->where('id', $topic_id)->or_where('parent_id', $topic_id)->count_all();
+        return $this->select('id')->where('id', $topic_id)->or_where('parent_id', $topic_id)->count_all_results($this->table_name());
     }
 
     /**
@@ -138,7 +138,7 @@ class Posts_m extends ForumsBase_m {
     {
         $entries = $this->get_entries(
             array(
-                'where' => $this->db->protect_identifiers('forum_id') . ' = ' . $this->db->escape($forum_id) . ' OR ' . $this->db->protect_identifiers('parent_id') . ' = 0',
+                'where' => $this->db->protect_identifiers('forum_id') . ' = ' . $this->db->escape($forum_id) . ' AND ' . $this->db->protect_identifiers('parent_id') . ' = 0',
                 'paginate' => 'yes',
                 'order_by' => 'created',
                 'sort' => 'asc',
@@ -157,7 +157,7 @@ class Posts_m extends ForumsBase_m {
         foreach($entries['entries'] as $key => $post)
         {
            $sticky[$key] = $post['is_sticky'];
-           $updated_on[$key] = $post['updated_on'];
+           $updated_on[$key] = $post['updated'];
            $created[$key] = $post['created'];
         }
 
@@ -182,22 +182,25 @@ class Posts_m extends ForumsBase_m {
     */
     public function last_forum_post($forum_id)
     {
-        $latest_post = $this->db
-                        ->select('id', 'parent_id')
-                        ->where( $this->table_name() . '.forum_id', $forum_id)
-                        ->order_by( $this->table_name() . '.created DESC')
-                        ->limit(1)
-                        ->get($this->table_name())
-                        ->row();
+        $latest_post = $this->get_entries(
+            array(
+                'where' => $this->db->protect_identifiers($this->table_name() . '.forum_id') . ' = ' . $this->db->escape($forum_id),
+                'order_by' => 'created',
+                'sort' => 'desc',
+                'limit' => 1
+            )
+        );
 
-        if( empty($latest_post) OR ! $latest_post->id )
+        $latest_post = reset($latest_post['entries']);
+
+        // if this isn't a topic, we'll ned to get the title
+        if($latest_post['parent_id'] != 0)
         {
-            return null;
+            $topic = $this->get_topic($latest_post['parent_id']);
+            $latest_post['title'] = $topic->title;
         }
 
-        $post_id = $latest_post->parent_id == 0 ? $latest_post->id : $latest_post->parent_id;
-
-        return $this->get_entry($post_id);
+        return $latest_post;
     }
 
     /**
@@ -212,15 +215,20 @@ class Posts_m extends ForumsBase_m {
     */
     public function last_topic_post($topic_id)
     {
-        $latest_topic =  $this->db
-                            ->select('id')
-                            ->or_where(array('id' => $topic_id, 'parent_id' => $topic_id))
-                            ->order_by('created DESC')
-                            ->limit(1)
-                            ->get('forum_posts')
-                            ->row();
+        $latest_post = $this->get_entries(
+            array(
+                'where' => $this->db->protect_identifiers($this->table_name() . '.parent_id') . ' = ' . $this->db->escape($topic_id),
+                'order_by' => 'created',
+                'sort' => 'desc',
+                'limit' => 1
+            )
+        );
 
-        return $this->get_entry($latest_topic->id);
+        $latest_post = reset($latest_post['entries']);
+        $topic = $this->get_topic($latest_post['parent_id']);
+        $latest_post['title'] = $topic->title;
+
+        return $latest_post;
     }
 	
     /**

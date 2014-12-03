@@ -27,10 +27,10 @@
             <td class="center_col"><?php echo $forum->topic_count; ?></td>
             <td class="center_col"><?php echo $forum->reply_count; ?></td>
             <td class="lastpost_info">
-                            <?php if(isset($forum->last_post->title)):?>
-                                <?php echo anchor('forums/posts/view_reply/'.$forum->last_post->id, $forum->last_post->title); ?><br/>
-		{{ helper:date format="M j Y | g:i a" timestamp="<?php echo $forum->last_post->created_on ?>"}}<br/>
-		Author: <?php echo $forum->last_post->author->full_name; ?>
+                            <?php if(isset($forum->last_post['title'])):?>
+                                <?php echo anchor('forums/posts/view_reply/'.$forum->last_post['id'], $forum->last_post['title']); ?><br/>
+		{{ helper:date format="M j Y | g:i a" timestamp="<?php echo $forum->last_post['created'] ?>"}}<br/>
+		Author: <?php echo $forum->last_post['created_by']['display_name']; ?>
                             <?php endif;?>
             </td>
         </tr>

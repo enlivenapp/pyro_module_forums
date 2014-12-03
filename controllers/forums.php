@@ -38,79 +38,68 @@ class Forums extends Public_Controller {
     {
         if( $forum_categories = $this->categories_m->get_all() )
         {
-	// Get list of categories
-	foreach($forum_categories as &$category)
-	  {
-	    $category->forums = $this->forums_m->get_many_by('category_id', $category->id);
-				
-	    // Get a list of forums in each category
-	    foreach($category->forums as &$forum)
-	      {
-		$forum->topic_count = $this->posts_m->count_topics_in_forum( $forum->id );
-		$forum->reply_count = $this->posts_m->count_replies_in_forum( $forum->id );
-		$forum->last_post = $this->posts_m->last_forum_post($forum->id);
-		if(!empty($forum->last_post))
-		  {
-		    $forum->last_post->author = $this->posts_m->author_info($forum->last_post->author_id);
-		  }
-	      }
-	  }
-      }
+    	   // Get list of categories
+    	   foreach($forum_categories as &$category)
+    	   {
+    	       $category->forums = $this->forums_m->get_many_by('category_id', $category->id);
+    				
+    	       // Get a list of forums in each category
+    	       foreach($category->forums as &$forum)
+    	       {
+        		  $forum->topic_count = $this->posts_m->count_topics_in_forum( $forum->id );
+        		  $forum->reply_count = $this->posts_m->count_replies_in_forum( $forum->id );
+        		  $forum->last_post = $this->posts_m->last_forum_post($forum->id);
+        	   }
+            }
+        }
 	
-    $data->forum_categories =& $forum_categories;
-    $this->template->set_breadcrumb('Forums');
-    $this->template->build('forum/index', $data);
-  }
+        $data->forum_categories =& $forum_categories;
+        $this->template->set_breadcrumb('Forums');
+        $this->template->build('forum/index', $data);
+    }
 
 
-  function view($forum_id = 0, $offset = 0)
-  {
-    // Check if forum exists, if not 404
-    ($forum = $this->forums_m->get($forum_id)) || show_404();
+    function view($forum_id = 0, $offset = 0)
+    {
+        // Check if forum exists, if not 404
+        ($forum = $this->forums_m->get($forum_id)) || show_404();
 
-    // Pagination junk
-    $per_page = '25';
-    $pagination = create_pagination('forums/view/'.$forum_id, $this->posts_m->count_topics_in_forum($forum_id), $per_page, 4);
+        // Pagination junk
+        $per_page = '25';
+        $pagination = create_pagination('forums/view/'.$forum_id, $this->posts_m->count_topics_in_forum($forum_id), $per_page, 4);
 
-    if($offset < $per_page)
-      {
-	$offset = 0;
-      }
-    $pagination['offset'] = $offset;
-    // End Pagination
+        if($offset < $per_page) {
+            $offset = 0;
+        }
+        
+        $pagination['offset'] = $offset;
+        // End Pagination
 
-    // Get all topics for this forum
-    $forum->topics = $this->posts_m->get_topics_by_forum($forum_id, $offset, $per_page);
-		
-    // Get a list of posts which have no parents (topics) in this forum
-    foreach($forum->topics['entries'] as &$topic)
-      {
-	$topic->post_count = $this->posts_m->count_posts_in_topic($topic->id);
-	$topic->last_post = $this->posts_m->last_topic_post($topic->id);
+        // Get all topics for this forum
+        $forum->topics = $this->posts_m->get_topics_by_forum($forum_id, $offset, $per_page);
+    	
+        // Get a list of posts which have no parents (topics) in this forum
+        foreach($forum->topics['entries'] as &$topic)
+        {
+            $topic['post_count'] = $this->posts_m->count_posts_in_topic($topic['id']);
+            $topic['last_post'] = $this->posts_m->last_topic_post($topic['id']);
 
-	if(!empty($topic->last_post))
-	  {
-	    $topic->last_post->author = $this->posts_m->author_info($topic->last_post->author_id);
-	  }
-      }
-		
-    $data->forum =& $forum;
-    $data->pagination = $pagination;
+        }
+    
+        $data->forum =& $forum;
+        $data->pagination = $pagination;
 
-    $this->template->set_breadcrumb('Forums', 'forums');
-    $this->template->set_breadcrumb($forum->title);
-    $this->template->build('forum/view', $data); 
-  }
+        $this->template->set_breadcrumb('Forums', 'forums');
+        $this->template->set_breadcrumb($forum->title);
+        $this->template->build('forum/view', $data); 
+    }
 
-  function unsubscribe($user_id, $topic_id)
-  {
-    $this->load->model('subscriptions_m');
-    $topic = $this->posts_m->get($topic_id);
-    $this->forum_subscriptions_m->delete_by(array('user_id' => $user_id, 'topic_id' => $topic_id));
-    $data->topic =& $topic;
-    $this->template->build('posts/unsubscribe', $data);
-
-  }
-
+    function unsubscribe($user_id, $topic_id)
+    {
+        $this->load->model('subscriptions_m');
+        $topic = $this->posts_m->get($topic_id);
+        $this->forum_subscriptions_m->delete_by(array('user_id' => $user_id, 'topic_id' => $topic_id));
+        $data->topic =& $topic;
+        $this->template->build('posts/unsubscribe', $data);
+    }
 }
-?>
