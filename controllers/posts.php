@@ -35,14 +35,14 @@ class Posts extends Public_Controller {
   {
     parent::__construct();
 
-
+$this->load->model('forumsbase_m');
         if (!is_logged_in())
     {
       redirect(site_url() . 'users/login');
     }
 
     // Load dependencies
-    $this->load->models(array('forums_m', 'forum_posts_m', 'forum_subscriptions_m'));
+    $this->load->models(array('forums_m', 'posts_m', 'subscriptions_m'));
     $this->load->helper('smiley');
     $this->load->library('Forums_lib');
     $this->load->config('forums');
@@ -78,11 +78,11 @@ class Posts extends Public_Controller {
   public function view_reply($reply_id = 0)
   {
     // If not a valid reply then 404
-    ($reply = $this->forum_posts_m->get_reply($reply_id)) || show_404();
+    ($reply = $this->posts_m->get_reply($reply_id)) || show_404();
 
     // Get the offset (for pagination)
     $per_page = 10;
-    $offset = (int) ($this->forum_posts_m->count_prior_posts($reply->parent_id, $reply->created_on) / $per_page);
+    $offset = (int) ($this->posts_m->count_prior_posts($reply->parent_id, $reply->created) / $per_page);
     $offset = ($offset == 0) ? '' : '/' . ($offset * $per_page);
 
     // Propogate flashdata
@@ -116,7 +116,7 @@ class Posts extends Public_Controller {
   public function quote_reply($post_id)
   {
     // If post is not valid 404
-    ($quote = $this->forum_posts_m->get_post($post_id)) || show_404();
+    ($quote = $this->posts_m->get_post($post_id)) || show_404();
 
     // Put the quote in the flashdata.
     $this->session->set_flashdata('forum_quote', serialize($quote));
@@ -147,7 +147,7 @@ class Posts extends Public_Controller {
     $this->ion_auth->logged_in() or redirect('users/login');
 
     // Get the topic and forum info
-    $topic = $this->forum_posts_m->get_topic($topic_id);
+    $topic = $this->posts_m->get_topic($topic_id);
     $forum = $this->forums_m->get(@$topic->forum_id);
 
     // Chech if there is a forum with that ID
@@ -174,7 +174,7 @@ class Posts extends Public_Controller {
       }
 
     // Default's notify based on if the user is subscribed already
-    $reply->notify = $this->forum_subscriptions_m->is_subscribed($this->current_user->id, $topic_id);
+    $reply->notify = $this->subscriptions_m->is_subscribed($this->current_user->id, $topic_id);
 
     // Decode the content.  This is required because of DB encoding.
     $reply->content = htmlspecialchars_decode($reply->content, ENT_QUOTES);
@@ -194,10 +194,10 @@ class Posts extends Public_Controller {
 	    		if( $this->input->post('submit') )
 	      	{
 						// Try and add the reply
-						if($reply->id = $this->forum_posts_m->new_reply($this->current_user->id, $reply, $topic))
+						if($reply->id = $this->posts_m->new_reply($this->current_user->id, $reply, $topic))
 		  			{
 		    			// Set Topic Update Time
-		    			$this->forum_posts_m->set_topic_update($topic->id);
+		    			$this->posts_m->set_topic_update($topic->id);
 						
 		    			// Set some info needed for notificaations
 		    			$reply->title = $topic->title;
@@ -210,13 +210,13 @@ class Posts extends Public_Controller {
 		    			// User wants to be notified
 		    			if($this->input->post('notify') == 1)
 		      		{
-								$this->forum_subscriptions_m->add($this->current_user->id, $topic->id);
+								$this->subscriptions_m->add($this->current_user->id, $topic->id);
 		      		}
 
 		    			// User does NOT want to be notified, so unsubscribe them.
 		    			else
 		      		{
-								$this->forum_subscriptions_m->delete_by(array('user_id' => $this->current_user->id, 'topic_id' => $topic->id));
+								$this->subscriptions_m->delete_by(array('user_id' => $this->current_user->id, 'topic_id' => $topic->id));
 		      		}
 		    				$this->session->set_flashdata('success', 'Reply has been added.');
 		    				redirect('forums/posts/view_reply/'.$reply->id);
@@ -275,18 +275,18 @@ class Posts extends Public_Controller {
     $this->ion_auth->logged_in() or redirect('users/login');
 
     // Get the reply info
-    $reply = $this->forum_posts_m->get($reply_id);
+    $reply = $this->posts_m->get($reply_id);
 
     // This is the main topic so get it's info
     if(empty($reply->parent_id))
       {
-				$topic = $this->forum_posts_m->get_topic($reply_id);
+				$topic = $this->posts_m->get_topic($reply_id);
       }
 
     	// This is a reply so get the parent's info
     	else
       {
-				$topic = $this->forum_posts_m->get_topic($reply->parent_id);
+				$topic = $this->posts_m->get_topic($reply->parent_id);
       }
 
     	// Get forum info
@@ -331,7 +331,7 @@ class Posts extends Public_Controller {
 	    		// Go ahead and update the reply
 	    		if( $this->input->post('submit') )
 	      	{
-						$reply->id = $this->forum_posts_m->update($reply_id, array(
+						$reply->id = $this->posts_m->update($reply_id, array(
 									   'content' => $reply->content
 									   ));
 
@@ -362,7 +362,7 @@ class Posts extends Public_Controller {
       }
 
     	// Default's notify based on if the user is subscribed already
-    	$reply->notify = $this->forum_subscriptions_m->is_subscribed($this->current_user->id, $topic->id);
+    	$reply->notify = $this->subscriptions_m->is_subscribed($this->current_user->id, $topic->id);
 
     	// Infor for the view
     	$data->forum =& $forum;
@@ -393,7 +393,7 @@ class Posts extends Public_Controller {
     $this->ion_auth->logged_in() or redirect('users/login');
 
     // Get the reply
-    $reply = $this->forum_posts_m->get($reply_id);
+    $reply = $this->posts_m->get($reply_id);
 
     // You can't delete a topic unless you are admin
     //($reply->parent_id == 0 && !$this->ion_auth->is_admin()) or show_404();
@@ -402,12 +402,12 @@ class Posts extends Public_Controller {
     ($this->current_user->id && $reply->author_id) or $this->ion_auth->is_admin() or show_404();
 
     // Delete the post
-    $this->forum_posts_m->delete($reply_id);
+    $this->posts_m->delete($reply_id);
 
     // If it's a topic delete all the replies
     if($reply->parent_id == 0)
       {
-	$this->forum_posts_m->delete_by(array('parent_id' => $reply_id));
+	$this->posts_m->delete_by(array('parent_id' => $reply_id));
 			
 	$this->session->set_flashdata('notice', 'The topic has been deleted.');
 	redirect('forums/view/' . $reply->forum_id);
@@ -424,7 +424,7 @@ class Posts extends Public_Controller {
   public function report($reply_id)
   {
     // Get the reply
-    $reply = $this->forum_posts_m->get($reply_id);
+    $reply = $this->posts_m->get($reply_id);
 
     // Send notifications
     if (!$this->forums_lib->notify_report($reply))

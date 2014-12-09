@@ -34,6 +34,8 @@ class Topics extends Public_Controller {
   public function __construct() {
     parent::__construct();
 
+    $this->load->model('forumsbase_m');
+
 
         if (!is_logged_in())
     {
@@ -41,7 +43,7 @@ class Topics extends Public_Controller {
     }
 
     // Load dependencies
-    $this->load->models(array('forums_m', 'forum_posts_m', 'forum_subscriptions_m'));
+    $this->load->models(array('forums_m', 'posts_m', 'subscriptions_m'));
     $this->load->helper('smiley');
     $this->lang->load('forums');
     $this->load->config('forums');
@@ -75,11 +77,11 @@ class Topics extends Public_Controller {
    */
   public function view($topic_id, $offset = 0) {
     // Update view counter
-    $this->forum_posts_m->add_topic_view($topic_id);
+    $this->posts_m->add_topic_view($topic_id);
 
     // Pagination junk
     $per_page = '10';
-    $pagination = create_pagination('forums/topics/view/'.$topic_id, $this->forum_posts_m->count_posts_in_topic($topic_id), $per_page, 5);
+    $pagination = create_pagination('forums/topics/view/'.$topic_id, $this->posts_m->count_posts_in_topic($topic_id), $per_page, 5);
     if($offset < $per_page) {
       $offset = 0;
     }
@@ -87,14 +89,13 @@ class Topics extends Public_Controller {
     // End Pagination
 
     // If topic or forum do not exist then 404
-    ($topic = $this->forum_posts_m->get($topic_id)) or show_404();
+    ($topic = $this->posts_m->get($topic_id)) or show_404();
     ($forum = $this->forums_m->get($topic->forum_id)) or show_404();
 
     // Get a list of posts which have no parents (topics) in this forum
-    $topic->posts = $this->forum_posts_m->get_posts_by_topic($topic_id, $offset, $per_page);
-    foreach($topic->posts as &$post) {
-      $post->author = $this->forum_posts_m->author_info($post->author_id);
-      $post->author->post_count =  $this->forum_posts_m->count_user_posts($post->author_id);
+    $topic->posts = $this->posts_m->get_posts_by_topic($topic_id, $offset, $per_page);
+    foreach($topic->posts['entries'] as &$post) {
+      $post['created_by']['post_count'] =  $this->posts_m->count_user_posts($post['created_by']['user_id']);
     }
     $data->topic =& $topic;
     $data->forum =& $forum;
@@ -136,15 +137,15 @@ class Topics extends Public_Controller {
 	  $topic->title = set_value('title');
 	  $topic->content = htmlspecialchars_decode(set_value('content'), ENT_QUOTES);
 
-	  if($topic->id = $this->forum_posts_m->new_topic($this->current_user->id, $topic, $forum)) {
-	    $this->forum_posts_m->set_topic_update($topic->id);
+	  if($topic->id = $this->posts_m->new_topic($this->current_user->id, $topic, $forum)) {
+	    $this->posts_m->set_topic_update($topic->id);
 
 	    // Add user to notify
 	    if($this->input->post('notify') == 1) {
-	      $this->forum_subscriptions_m->add($this->current_user->id, $topic->id);
+	      $this->subscriptions_m->add($this->current_user->id, $topic->id);
 	    }
 	    else {
-	      $this->forum_subscriptions_m->delete_by(array('user_id' => $this->current_user->id, 'topic_id' => $topic->id));
+	      $this->subscriptions_m->delete_by(array('user_id' => $this->current_user->id, 'post_id' => $topic->id));
 	    }
 	    redirect('forums/topics/view/'.$topic->id);
 	  }
@@ -157,7 +158,7 @@ class Topics extends Public_Controller {
 	// Preview button was hit, just show em what the post will look like
 	elseif( $this->input->post('preview') ) {
 	  // Define and Parse Preview
-	  //$data->preview = $this->forum_posts_m->postParse($message, $smileys);
+	  //$data->preview = $this->posts_m->postParse($message, $smileys);
 
 	  $data->show_preview = TRUE;
 	}
@@ -183,7 +184,7 @@ class Topics extends Public_Controller {
 
     $this->ion_auth->is_admin() or show_404();
 
-    if($this->forum_posts_m->update($topic_id, array('sticky' => 1))) {
+    if($this->posts_m->update($topic_id, array('sticky' => 1))) {
       $this->session->set_flashdata('success', 'Topic has been made sticky.');
     }
     else {
@@ -198,7 +199,7 @@ class Topics extends Public_Controller {
 
     $this->ion_auth->is_admin() or show_404();
 
-    if($this->forum_posts_m->update($topic_id, array('sticky' => 0))) {
+    if($this->posts_m->update($topic_id, array('sticky' => 0))) {
       $this->session->set_flashdata('success', 'Topic has been unstuck.');
     }
     else {
