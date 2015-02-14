@@ -10,47 +10,48 @@ class Module_Forums extends Module {
     private $forums_stream = 'forums';
     private $subscriptions_stream = 'subscriptions';
     private $posts_stream = 'posts';
+    private $permission_labels_stream = 'permission_labels';
+    private $permissions_stream = "permissions";
 
     public $version = '2.0';
 
     public function info() {
-        return array(
-            'name' => array(
-                'en' => 'Forums',
-            ),
-            'description' => array(
-                  'en' => 'The forum for your site',
-            ),
+      return array(
+        'name' => array(
+          'en' => 'Forums',
+        ),
+        'description' => array(
+          'en' => 'The forum for your site',
+        ),
 
-            'frontend'  => TRUE,
-            'backend'   => TRUE,
-            'menu'  => 'content',
-
-            'sections'  => array(
-                'forums' => array(
-                    'name' => 'forums_forum_label',
-                    'uri' => 'admin/forums/list_forums',
-                    'shortcuts' => array(
-                    array(
-                        'name' => 'forums_create_forum_title',
-                        'uri'  => 'admin/forums/create_forum',
-                        'class'  => 'add'
-                      ),
-                    ),
-                ),
-                'categories' => array(
-                    'name' => 'forums_category_title',
-                    'uri' => 'admin/forums/index',
-                    'shortcuts' => array(
-                        array(
-                            'name'  => 'forums_create_category_title',
-                            'uri'   => 'admin/forums/create_category',
-                            'class' => 'add'
-                        ),
-                    ),
-                ),
-            )
-        );
+        'frontend'  => TRUE,
+        'backend'   => TRUE,
+        'menu'  => 'content',
+        'sections'  => array(
+          'forums' => array(
+            'name' => 'forums:forums',
+            'uri' => 'admin/forums/list_forums',
+            'shortcuts' => array(
+              array(
+                'name' => 'forums:create_forum_title',
+                'uri'  => 'admin/forums/create_forum',
+                'class'  => 'add'
+              ),
+            ),
+          ),
+          'categories' => array(
+            'name' => 'forums:category_title',
+            'uri' => 'admin/forums/index',
+            'shortcuts' => array(
+              array(
+                'name'  => 'forums:create_category_title',
+                'uri'   => 'admin/forums/create_category',
+                'class' => 'add'
+              ),
+            ),
+          ),
+        )
+      );
     }
 
     public function install() {
@@ -62,127 +63,154 @@ class Module_Forums extends Module {
         $forums_stream_id = $this->streams->streams->add_stream( 'lang:forums:forums', $this->forums_stream, $this->namespace, $this->stream_prefix, null, array('title_column' => 'title'));
         $posts_stream_id = $this->streams->streams->add_stream( 'lang:forums:posts', $this->posts_stream, $this->namespace, $this->stream_prefix, null, array('title_column' => 'title'));
         $subscriptions_stream_id = $this->streams->streams->add_stream( 'lang:forums:subscriptions', $this->subscriptions_stream, $this->namespace, $this->stream_prefix, null, array('title_column' => 'title'));
+        $permission_labels_id = $this->streams->streams->add_stream( 'lang:forums:permission_labels', $this->permission_labels_stream, $this->namespace, $this->stream_prefix, null, array('title_column' => 'title'));
+        $permissions_id = $this->streams->streams->add_stream( 'lang:forums:permissions', $this->permissions_stream, $this->namespace, $this->stream_prefix, null, array('title_column' => 'title'));
 
         $fields = array(
-            'title' => array(
-                'name' => 'lang:forums:title_label',
-                'slug' => 'title',
-                'namespace' => $this->namespace,
-                'type' => 'text',
-                'extra' => array(
-                    'max_length' => 255
-                )
-            ),
+          'title' => array(
+            'name' => 'lang:forums:title_label',
+            'slug' => 'title',
+            'namespace' => $this->namespace,
+            'type' => 'text',
+            'extra' => array(
+              'max_length' => 255
+            )
+          ),
             /* placeholder since uncertain how/why to use this field
             'permission' => array()
+
+            This was a note to myself to write in permissions. - Mike
             */
-            'description' => array(
-                'name' => 'lang:forums:description',
-                'slug' => 'description',
-                'namespace' => $this->namespace,
-                'type' => 'wysiwyg',
-                'extra' => array(
-                    'editor_type' => 'simple'
-                )
-            ),
-            'category_id' => array(
-                'name' => 'lang:forums:category',
-                'slug' => 'category_id',
-                'namespace' => $this->namespace,
-                'type' => 'relationship',
-                'extra' => array(
-                    'choose_stream' => $categories_stream_id
-                )
-            ),
-            'forum_id' => array(
-                'name' => 'lang:forums:forum',
-                'slug' => 'forum_id',
-                'namespace' => $this->namespace,
-                'type' => 'relationship',
-                'extra' => array(
-                    'choose_stream' => $forums_stream_id
-                )
-            ),
-            'parent_id' => array(
-                'name' => 'lang:forums:parent_post',
-                'slug' => 'parent_id',
-                'namespace' => $this->namespace,
-                'type' => 'integer',
-                'extra' => array(
-                    'default_value' => 0
-                )
-            ),
-            'content' => array(
-                'name' => 'lang:forums:content',
-                'slug' => 'content',
-                'namespace' => $this->namespace,
-                'type' => 'textarea',
-                'extra' => array(
-                    'content_type' => 'HTML',
-                    'allow_lex_tags' => 'no'
-                )
-            ),
-            'type' => array(
-                'name' => 'lang:forums:type',
-                'slug' => 'type',
-                'namespace' => $this->namespace,
-                'type' => 'integer',
-                'extra' => array(
-                    'max_length' => 1
-                )
-            ),
-            'is_locked' => array(
-                'name' => 'lang:forums:is_locked',
-                'slug' => 'is_locked',
-                'namespace' => $this->namespace,
-                'type' => 'choice',
-                'extra' => array(
-                    'choice_type' => 'radio',
-                    'choice_data' => "yes : lang:forums:yes\nno : lang:forums:no",
-                    'default_value' => 'no',
-                )
-            ),
-            'is_hidden' => array(
-                'name' => 'lang:forums:is_hidden',
-                'slug' => 'is_hidden',
-                'namespace' => $this->namespace,
-                'type' => 'choice',
-                'extra' => array(
-                    'choice_type' => 'radio',
-                    'choice_data' => "yes : lang:forums:yes\nno : lang:forums:no",
-                    'default_value' => 'no',
-                )
-            ),
-            'is_sticky' => array(
-                'name' => 'lang:forums:is_sticky',
-                'slug' => 'is_sticky',
-                'namespace' => $this->namespace,
-                'type' => 'choice',
-                'extra' => array(
-                    'choice_type' => 'radio',
-                    'choice_data' => "yes : lang:forums:yes\nno : lang:forums:no",
-                    'default_value' => 'no',
-                )
-            ),
-            'view_count' => array(
-                'name' => 'lang:forums:view_count',
-                'slug' => 'view_count',
-                'namespace' => $this->namespace,
-                'type' => 'integer',
-                'extra' => array()
-            ),
-            'post_id' => array(
-                'name' => 'lang:forum:topic',
-                'slug' => 'post_id',
-                'namespace' => $this->namespace,
-                'type' => 'integer'
-            ),
-            'user_id' => array(
-                'name' => 'lang:forum:user',
-                'slug' => 'user_id',
-                'namespace' => $this->namespace,
-                'type' => 'integer'
+          'description' => array(
+            'name' => 'lang:forums:description_label',
+            'slug' => 'description',
+            'namespace' => $this->namespace,
+            'type' => 'wysiwyg',
+            'extra' => array(
+              'editor_type' => 'simple'
             )
+          ),
+          'category_id' => array(
+            'name' => 'lang:forums:category_label',
+            'slug' => 'category_id',
+            'namespace' => $this->namespace,
+            'type' => 'relationship',
+            'extra' => array(
+              'choose_stream' => $categories_stream_id
+            )
+          ),
+          'forum_id' => array(
+            'name' => 'lang:forums:forum_title',
+            'slug' => 'forum_id',
+            'namespace' => $this->namespace,
+            'type' => 'relationship',
+            'extra' => array(
+              'choose_stream' => $forums_stream_id
+            )
+          ),
+          'parent_id' => array(
+            'name' => 'lang:forums:parent_post',
+            'slug' => 'parent_id',
+            'namespace' => $this->namespace,
+            'type' => 'integer',
+            'extra' => array(
+              'default_value' => 0
+            )
+          ),
+          'content' => array(
+            'name' => 'lang:forums:content',
+            'slug' => 'content',
+            'namespace' => $this->namespace,
+            'type' => 'textarea',
+            'extra' => array(
+              'content_type' => 'HTML',
+              'allow_lex_tags' => 'no'
+            )
+          ),
+          'type' => array(
+            'name' => 'lang:forums:type',
+            'slug' => 'type',
+            'namespace' => $this->namespace,
+            'type' => 'integer',
+            'extra' => array(
+              'max_length' => 1
+            )
+          ),
+          'is_locked' => array(
+            'name' => 'lang:forums:is_locked',
+            'slug' => 'is_locked',
+            'namespace' => $this->namespace,
+            'type' => 'choice',
+            'extra' => array(
+              'choice_type' => 'radio',
+              'choice_data' => "yes : lang:forums:yes\nno : lang:forums:no",
+              'default_value' => 'no',
+            )
+          ),
+          'is_hidden' => array(
+            'name' => 'lang:forums:is_hidden',
+            'slug' => 'is_hidden',
+            'namespace' => $this->namespace,
+            'type' => 'choice',
+            'extra' => array(
+              'choice_type' => 'radio',
+              'choice_data' => "yes : lang:forums:yes\nno : lang:forums:no",
+              'default_value' => 'no',
+            )
+          ),
+          'is_sticky' => array(
+            'name' => 'lang:forums:is_sticky',
+            'slug' => 'is_sticky',
+            'namespace' => $this->namespace,
+            'type' => 'choice',
+            'extra' => array(
+              'choice_type' => 'radio',
+              'choice_data' => "yes : lang:forums:yes\nno : lang:forums:no",
+              'default_value' => 'no',
+            )
+          ),
+          'view_count' => array(
+            'name' => 'lang:forums:view_count_label',
+            'slug' => 'view_count',
+            'namespace' => $this->namespace,
+            'type' => 'integer',
+            'extra' => array()
+          ),
+          'post_id' => array(
+            'name' => 'lang:forums:topic_label',
+            'slug' => 'post_id',
+            'namespace' => $this->namespace,
+            'type' => 'integer'
+          ),
+          'user_id' => array(
+            'name' => 'lang:forums:user_label',
+            'slug' => 'user_id',
+            'namespace' => $this->namespace,
+            'type' => 'integer'
+          ),
+          'slug' => array(
+            'name' => 'lang:forums:slug_label',
+            'slug' => 'slug',
+            'namespace' => $this->namespace,
+            'type' => 'text'
+          ),
+          'perm_id' => array(
+            'name' => 'lang:forums:permid_label',
+            'slug' => 'perm_id',
+            'namespace' => $this->namespace,
+            'type' => 'integer'
+          ),
+          'active' => array(
+            'name' => 'lang:forums:active_label',
+            'slug' => 'active',
+            'namespace' => $this->namespace,
+            'type' => 'choice',
+            'extra' => array(
+              'choice_type' => 'radio',
+              'choice_data' => "yes : lang:forums:yes\nno : lang:forums:no",
+              'default_value' => 'yes'
+            )
+          ),
         );
 
         // add all the fields
@@ -219,19 +247,36 @@ class Module_Forums extends Module {
         $this->streams->fields->assign_field($this->namespace, $this->subscriptions_stream, $fields['post_id']['slug'], array('required' => true));
         $this->streams->fields->assign_field($this->namespace, $this->subscriptions_stream, $fields['user_id']['slug'], array('required' => true));
 
+        /*
+        * assign fields to permission labels stream
+        ***/
+        $this->streams->fields->assign_field($this->namespace, $this->permission_labels_stream, $fields['title']['slug'], array('required' => true));
+        $this->streams->fields->assign_field($this->namespace, $this->permission_labels_stream, $fields['slug']['slug'], array('required' => true));
+        $this->streams->fields->assign_field($this->namespace, $this->permission_labels_stream, $fields['description']['slug'], array('required' => false, 'instructions' => 'lang:forums:perm_label_instructions'));
+
+
+        /*
+        * assign fields to permissions stream
+        ***/
+        $this->streams->fields->assign_field($this->namespace, $this->permissions_stream, $fields['user_id']['slug'], array('required' => true));
+        $this->streams->fields->assign_field($this->namespace, $this->permissions_stream, $fields['perm_id']['slug'], array('required' => true));
+        $this->streams->fields->assign_field($this->namespace, $this->permissions_stream, $fields['active']['slug'], array('required' => true, 'instructions' => 'lang:forums:active_instructions'));
+
+
         // settings
         // remove old settings
         $this->db->delete('settings', array('module' => $this->module));
         // set the settings
+        // remove. going to markdown
         $settings = array(
             array(
                 'slug'         => 'forums_editor',
                 'title'        => 'Forum Editor',
                 'description'  => 'Which editor should the forums use?',
                 'type'         => 'select',
-                '`default`'    => 'bbcode',
-                '`value`'      => 'bbcode',
-                'options'      => 'bbcode=BBCode|textile=Textile',
+                '`default`'    => 'markdown',
+                '`value`'      => 'markdown',
+                'options'      => 'markdown=Markdown',
                 'is_required'  => 1,
                 'is_gui'       => 1,
                 'module'       => 'forums'
@@ -267,8 +312,30 @@ class Module_Forums extends Module {
     }
 
     public function upgrade($old_version) {
-      // Your Upgrade Logic
-      return TRUE;
+
+      if ($old_version <= '1.4.9')
+      {
+        // this will catch original public version 1.0
+        // lots to do to convert from dbforge to streams...
+
+        // but for now..
+        return false;
+      }
+      elseif ($old_version <= '1.5.9')
+      {
+        // this will catch my v1.5 to convert up to 2
+        // lots to do to convert from dbforge to streams...
+
+        // but for now..
+        return false;
+      }
+      elseif ($old_version == '2.0.0')
+      {
+        // current version
+        return true;
+      }
+      // default
+      return false;
     }
 
     public function help() {

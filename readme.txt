@@ -4,8 +4,8 @@ Native Forum Module for PyroCMS
 
 
 -- PyroCMS Compatibility --
-3.0   - No (untested)
-2.3   - No (untested)
+3.0   - No 
+2.3   - No (It's dead Jim)
 2.2.x - Yes
 2.1.x - Possibly (please report)
 < 2.1.x - Unknown, probably not.
@@ -28,11 +28,14 @@ Interested in contributing?  Open an issue tracker or submit a pull request. (do
   - install via admin panel.
 
 -- ToDo --
-  - Settings: allow access to forums for logged in/not logged in as chosen by site admin
-  - Convert to streams
-  - Update views to use Bootstrap and/or other CSS (IE: lose the tables layout)
-  - Drag and drop to reorder categories and Forums (Currently, first in = top of list, last in = bottom of list)
-  - Add moderator functionality (currently, it's site admin or nothing.  Most don't want to give that kind of access to just anyone)
+  x Settings: allow access to forums for logged in/not logged in as chosen by site admin
+  - Convert to streams (done by Mark)
+  x Update views to use Bootstrap and/or other CSS (IE: lose the tables layout)
+  x Drag and drop to reorder categories and Forums (Currently, first in = top of list, last in = bottom of list)
+  x Add moderator functionality (currently, it's site admin or nothing.  Most don't want to give that kind of access to just anyone)
+  x loose latex and bbcode
+  x add markdown support
+  - add permissions (In progress - Mike)
 
 
 -- Change Log --
