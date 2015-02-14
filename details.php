@@ -13,7 +13,7 @@ class Module_Forums extends Module {
     private $permission_labels_stream = 'permission_labels';
     private $permissions_stream = "permissions";
 
-    public $version = '2.0';
+    public $version = '2.0.0';
 
     public function info() {
       return array(
@@ -21,7 +21,7 @@ class Module_Forums extends Module {
           'en' => 'Forums',
         ),
         'description' => array(
-          'en' => 'The forum for your site',
+          'en' => 'Navtive Forum for PyroCMS 2.2.x',
         ),
 
         'frontend'  => TRUE,
@@ -254,7 +254,6 @@ class Module_Forums extends Module {
         $this->streams->fields->assign_field($this->namespace, $this->permission_labels_stream, $fields['slug']['slug'], array('required' => true));
         $this->streams->fields->assign_field($this->namespace, $this->permission_labels_stream, $fields['description']['slug'], array('required' => false, 'instructions' => 'lang:forums:perm_label_instructions'));
 
-
         /*
         * assign fields to permissions stream
         ***/
@@ -269,18 +268,30 @@ class Module_Forums extends Module {
         // set the settings
         // remove. going to markdown
         $settings = array(
-            array(
-                'slug'         => 'forums_editor',
-                'title'        => 'Forum Editor',
-                'description'  => 'Which editor should the forums use?',
-                'type'         => 'select',
-                '`default`'    => 'markdown',
-                '`value`'      => 'markdown',
-                'options'      => 'markdown=Markdown',
-                'is_required'  => 1,
-                'is_gui'       => 1,
-                'module'       => 'forums'
-            ),
+          array(
+            'slug'         => 'forums_not_logged_in_access',
+            'title'        => 'Allow Public Access',
+            'description'  => 'Can people *not* logged in see the forums? Users are always required to log in to post.',
+            'type'         => 'select',
+            '`default`'    => 'no',
+            '`value`'      => 'no',
+            'options'      => 'no=Only logged in users see Forums|yes=Anyone can see the Forums',
+            'is_required'  => 1,
+            'is_gui'       => 1,
+            'module'       => 'forums'
+          ),
+          array(
+            'slug'         => 'forums_framework_support',
+            'title'        => 'Frontend Framework Support',
+            'description'  => 'Choose a supported framework below',
+            'type'         => 'select',
+            '`default`'    => 'basic',
+            '`value`'      => 'basic',
+            'options'      => 'basic=Basic|bootstrap3=Bootstrap 3',
+            'is_required'  => 1,
+            'is_gui'       => 1,
+            'module'       => 'forums'
+          ),
         );
         
         // install them settings

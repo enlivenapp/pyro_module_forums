@@ -261,6 +261,7 @@ class Posts_m extends ForumsBase_m {
     */
 
     // how the hell does the caller know that this is a topic without getting the infos first?
+    // magic?  -Mike
     function get_topic($topic_id = 0)
     {
         return $this->get_entry($topic_id, false);

@@ -182,12 +182,12 @@ table.form_table tbody td.form_options input {
  * Error Styles
  *************************************/
 
+
 div.errors {
 	padding: 10px;
-	font-size: 12px;
 	color: #FF0000;
-	background-color: #EEEEEE;
-	border: 1px solid #CCCCCC;
+	border: 1px solid #F00;
+	font-weight: bold;
 }
 
 p.form_error {
@@ -286,4 +286,9 @@ p.forum_buttons a {
 p.forum_buttons a:hover {
 	color: #333333;
 	background-color: #DDDDDD;
+}
+
+
+.center {
+	text-align: center;
 }

@@ -1,62 +1,77 @@
 <?php
 class Forums extends Public_Controller {
 
-    function __construct()
+
+  function __construct()
+  {
+    parent::__construct();
+
+    // set the admin's preferred framework, if any.
+    // we use this to switch which frontend framework
+    // set we're using in the views files.  IE:
+    // /frameworks/basic/...  or  /frameworks/bootstrap3/... etc...
+    $this->framework = 'frameworks/' . Settings::get('forums_framework_support') . '/';
+
+    // added in 2.0.0  ability for admin to choose if
+    // users must be logged in or if the public at-large
+    // can see the forums without loggin in.
+    if (!is_logged_in() && Setttings::get('forums_not_logged_in_access') == 'no')
     {
-        parent::__construct();
-
-        // TODO: settify this, maybe
-        if ( ! is_logged_in())
-        {
-            redirect(site_url() . 'users/login');
-        }
-		
-        $this->load->model('forumsbase_m');
-        $this->load->model('forums_m');
-        $this->load->model('categories_m');
-        $this->load->model('posts_m');
-
-        $this->lang->load('forums');
-        $this->load->config('forums');
-
-        if(!Settings::get('forums_editor'))
-        {
-	       $this->forums_m->add_setting();
-        }
-
-        $this->template->enable_parser_body(FALSE);
-
-		$this->template->append_css('module::forums.css');
-		$this->template->append_js('module::forums.js');
-
-        $this->template->set_breadcrumb('Home', '/');
-
+      $this->session->set_flashdata('error', 'Sorry,  You must be logged in to see the forums. Please login and try again.');
+      redirect(site_url('users/login'));
     }
-	
-	
-    function index()
+
+    $this->load->model('forumsbase_m');
+    $this->load->model('forums_m');
+    $this->load->model('categories_m');
+    $this->load->model('posts_m');
+
+    $this->lang->load('forums');
+    $this->load->config('forums');
+
+    // turn off Lex
+    $this->template->enable_parser_body(FALSE);
+
+    // if they're using the basic settings, we'll add the basic CSS
+    // file.  Otherwise, the code will be written to depend on the
+    // css file in the theme.
+    if (Settings::get('forums_framework_support') == 'basic')
     {
-        if( $forum_categories = $this->categories_m->get_all() )
-        {
-    	   // Get list of categories
-    	   foreach($forum_categories as &$category)
-    	   {
-    	       $category->forums = $this->forums_m->get_many_by('category_id', $category->id);
-    				
-    	       // Get a list of forums in each category
-    	       foreach($category->forums as &$forum)
-    	       {
-        		  $forum->topic_count = $this->posts_m->count_topics_in_forum( $forum->id );
-        		  $forum->reply_count = $this->posts_m->count_replies_in_forum( $forum->id );
-        		  $forum->last_post = $this->posts_m->last_forum_post($forum->id);
-        	   }
-            }
-        }
-	
-        $data->forum_categories =& $forum_categories;
-        $this->template->set_breadcrumb('Forums');
-        $this->template->build('forum/index', $data);
+      // add basic CSS file
+      $this->template->append_css('module::forums.css');
     }
+
+    // we make need to worry about including this later
+    // but leaving it in the wild for now.
+  	$this->template->append_js('module::forums.js');
+
+    $this->template->set_breadcrumb('Home', '/');
+
+  }
+	
+	
+  function index()
+  {
+    if( $forum_categories = $this->categories_m->get_all() )
+    {
+	   // Get list of categories
+	   foreach($forum_categories as &$category)
+	   {
+       $category->forums = $this->forums_m->get_many_by('category_id', $category->id);
+			
+       // Get a list of forums in each category
+       foreach($category->forums as &$forum)
+       {
+  		  $forum->topic_count = $this->posts_m->count_topics_in_forum( $forum->id );
+  		  $forum->reply_count = $this->posts_m->count_replies_in_forum( $forum->id );
+  		  $forum->last_post = $this->posts_m->last_forum_post($forum->id);
+  	   }
+      }
+    }
+    $data->forum_categories =& $forum_categories;
+    $this->template->set_breadcrumb('Forums');
+    $this->template->build($this->framework . 'forum/index', $data);
+  }
 
 
     function view($forum_id = 0, $offset = 0)

@@ -19,4 +19,9 @@ class Forums_m extends ForumsBase_m {
 		
 	}
 
+	public function add_setting()
+	{
+		
+	}
+
 }
