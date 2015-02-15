@@ -42,6 +42,8 @@
             <td class="center_col"><?php echo $topic['post_count'];?></td>
             <td class="center_col"><?php echo $topic['view_count']?></td>
             <td class="lastpost_info">
+            
+                
                         <?php if(!empty($topic['last_post'])):?>
 			<?php echo anchor('forums/posts/view_reply/'.$topic['last_post']['id'], date('M j Y | g:i a', $topic['last_post']['created'])); ?><br/>
 			Author: <?php echo $topic['last_post']['created_by']['display_name']; ?>

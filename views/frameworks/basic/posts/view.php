@@ -58,7 +58,7 @@
                         <?php echo $post['created_by']['post_count'];?>
                 </p>
             </td>
-            <td colspan="2" valign="top"><?php echo parse(htmlentities($post['content']), 0, TRUE); ?></td>
+            <td colspan="2" valign="top"><?php echo parse_markdown(htmlentities($post['content'])); ?></td>
         </tr>
 
         <tr class="postlinks">

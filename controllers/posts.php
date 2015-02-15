@@ -35,35 +35,46 @@ class Posts extends Public_Controller {
   {
     parent::__construct();
 
-$this->load->model('forumsbase_m');
-        if (!is_logged_in())
+    // set the admin's preferred framework, if any.
+    // we use this to switch which frontend framework
+    // set we're using in the views files.  IE:
+    // /frameworks/basic/...  or  /frameworks/bootstrap3/... etc...
+    $this->framework = 'frameworks/' . Settings::get('forums_framework_support') . '/';
+
+    // added in 2.0.0  ability for admin to choose if
+    // users must be logged in or if the public at-large
+    // can see the forums without loggin in.
+    if (!is_logged_in() && Setttings::get('forums_not_logged_in_access') == 'no')
     {
-      redirect(site_url() . 'users/login');
+      $this->session->set_flashdata('error', 'Sorry,  You must be logged in to see the forums. Please login and try again.');
+      redirect(site_url('users/login'));
     }
 
-    // Load dependencies
-    $this->load->models(array('forums_m', 'posts_m', 'subscriptions_m'));
-    $this->load->helper('smiley');
-    $this->load->library('Forums_lib');
-    $this->load->config('forums');
+    $this->load->models(array('forumsbase_m', 'forums_m', 'posts_m', 'subscriptions_m'));
+
     $this->lang->load('forums');
+    $this->load->config('forums');
+    $this->load->library('Forums_lib');
 
-    if(!Settings::get('forums_editor'))
-      {
-	$this->forums_m->add_setting();
-      }
-
-    $this->load->helper(Settings::get('forums_editor'));
-
-    // Template settings
+    // turn off Lex
     $this->template->enable_parser_body(FALSE);
 
-    //$this->template->set_module_layout('default');
-		$this->template->append_css('module::forums.css');
-		$this->template->append_js('module::forums.js');
-		
+    // if they're using the basic settings, we'll add the basic CSS
+    // file.  Otherwise, the code will be written to depend on the
+    // css file in the theme.
+    if (Settings::get('forums_framework_support') == 'basic')
+    {
+      // add basic CSS file
+      $this->template->append_css('module::forums.css');
+    }
+
+    // we make need to worry about including this later
+    // but leaving it in the wild for now.
+    $this->template->append_js('module::forums.js');
+
     $this->template->set_breadcrumb('Home', '/')
-      ->set_breadcrumb('Forums', 'forums');
+                   ->set_breadcrumb('Forums', 'forums');
+
   }
 	
   /**
@@ -251,11 +262,10 @@ $this->load->model('forumsbase_m');
 
 
     // Template settings, then build
-    $this->template->set_partial('buttons', 'partials/buttons');
     $this->template->set_breadcrumb($forum->title, 'forums/view/'.$topic->forum_id);
     $this->template->set_breadcrumb($topic->title, 'forums/topics/view/'.$topic->id);
     $this->template->set_breadcrumb('New Reply');
-    $this->template->build('posts/reply_form', $data);
+    $this->template->build($this->framework . 'posts/reply_form', $data);
   }
 
   /**

@@ -1,7 +1,11 @@
 <?php
 class Forums extends Public_Controller {
 
-
+  /**
+   * The constructor
+   * @access public
+   * @return void
+   */
   function __construct()
   {
     parent::__construct();
@@ -21,10 +25,7 @@ class Forums extends Public_Controller {
       redirect(site_url('users/login'));
     }
 
-    $this->load->model('forumsbase_m');
-    $this->load->model('forums_m');
-    $this->load->model('categories_m');
-    $this->load->model('posts_m');
+    $this->load->models(array('forumsbase_m', 'forums_m', 'categories_m', 'posts_m'));
 
     $this->lang->load('forums');
     $this->load->config('forums');
@@ -49,7 +50,14 @@ class Forums extends Public_Controller {
 
   }
 	
-	
+	/**
+   * Index
+   *
+   * Default/Starting controller
+   *
+   * @access public
+   * @return void
+   */
   function index()
   {
     if( $forum_categories = $this->categories_m->get_all() )
@@ -74,47 +82,60 @@ class Forums extends Public_Controller {
   }
 
 
-    function view($forum_id = 0, $offset = 0)
-    {
-        // Check if forum exists, if not 404
-        ($forum = $this->forums_m->get($forum_id)) || show_404();
+  /**
+   * View
+   *
+   * Shows a specific forum and it's
+   * contents.
+   *
+   * @access public
+   * @return void
+   */
+  function view($forum_id = 0, $offset = 0)
+  {
+    // Check if forum exists, if not 404
+    ($forum = $this->forums_m->get($forum_id)) || show_404();
 
-        // Pagination junk
-        $per_page = '25';
-        $pagination = create_pagination('forums/view/'.$forum_id, $this->posts_m->count_topics_in_forum($forum_id), $per_page, 4);
+    // Pagination junk
+    $per_page = '25';
+    $pagination = create_pagination('forums/view/'.$forum_id, $this->posts_m->count_topics_in_forum($forum_id), $per_page, 4);
 
-        if($offset < $per_page) {
-            $offset = 0;
-        }
-        
-        $pagination['offset'] = $offset;
-        // End Pagination
-
-        // Get all topics for this forum
-        $forum->topics = $this->posts_m->get_topics_by_forum($forum_id, $offset, $per_page);
-    	
-        // Get a list of posts which have no parents (topics) in this forum
-        foreach($forum->topics['entries'] as &$topic)
-        {
-            $topic['post_count'] = $this->posts_m->count_posts_in_topic($topic['id']);
-            $topic['last_post'] = $this->posts_m->last_topic_post($topic['id']);
-
-        }
+    $offset = ($offset < $per_page) ? 0 : $offset;
     
-        $data->forum =& $forum;
-        $data->pagination = $pagination;
+    $pagination['offset'] = $offset;
+    // End Pagination
 
-        $this->template->set_breadcrumb('Forums', 'forums');
-        $this->template->set_breadcrumb($forum->title);
-        $this->template->build('forum/view', $data); 
-    }
-
-    function unsubscribe($user_id, $topic_id)
+    // Get all topics for this forum
+    $forum->topics = $this->posts_m->get_topics_by_forum($forum_id, $offset, $per_page);
+	
+    // Get a list of posts which have no parents (topics) in this forum
+    foreach($forum->topics['entries'] as &$topic)
     {
-        $this->load->model('subscriptions_m');
-        $topic = $this->posts_m->get($topic_id);
-        $this->forum_subscriptions_m->delete_by(array('user_id' => $user_id, 'topic_id' => $topic_id));
-        $data->topic =& $topic;
-        $this->template->build('posts/unsubscribe', $data);
+      //echo "<pre>";
+      //print_r($topic);
+      //echo "</pre>";
+      $topic['post_count'] = $this->posts_m->count_posts_in_topic($topic['id']);
+      $topic['last_post'] = $this->posts_m->last_topic_post($topic['parent_id']);
+
     }
+
+    $data->forum =& $forum;
+    $data->pagination = $pagination;
+
+    $this->template->set_breadcrumb('Forums', 'forums');
+    $this->template->set_breadcrumb($forum->title);
+    $this->template->build($this->framework . 'forum/view', $data); 
+  }
+
+
+
+
+  function unsubscribe($user_id, $topic_id)
+  {
+    $this->load->model('subscriptions_m');
+    $topic = $this->posts_m->get($topic_id);
+    $this->forum_subscriptions_m->delete_by(array('user_id' => $user_id, 'topic_id' => $topic_id));
+    $data->topic =& $topic;
+    $this->template->build($this->framework . 'posts/unsubscribe', $data);
+  }
 }

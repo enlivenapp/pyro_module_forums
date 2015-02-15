@@ -1,4 +1,19 @@
 <?php  if (!defined('BASEPATH')) exit('No direct script access allowed');
+
+/**
+ * Topics Controller
+ *
+ * 
+ *
+ * @package   PyroCMS
+ * @author    Michael Webber
+ * @author    Marco Gruter
+ * @license   Apache License v2.0
+ * @link    http://pyrocms.com
+ * @since   Version 1.5.x
+ * @filesource
+ */
+
 /**
  * PyroCMS
  *
@@ -34,35 +49,46 @@ class Topics extends Public_Controller {
   public function __construct() {
     parent::__construct();
 
-    $this->load->model('forumsbase_m');
+    // set the admin's preferred framework, if any.
+    // we use this to switch which frontend framework
+    // set we're using in the views files.  IE:
+    // /frameworks/basic/...  or  /frameworks/bootstrap3/... etc...
+    $this->framework = 'frameworks/' . Settings::get('forums_framework_support') . '/';
 
-
-        if (!is_logged_in())
+    // added in 2.0.0  ability for admin to choose if
+    // users must be logged in or if the public at-large
+    // can see the forums without loggin in.
+    if (!is_logged_in() && Setttings::get('forums_not_logged_in_access') == 'no')
     {
-      redirect(site_url() . 'users/login');
+      $this->session->set_flashdata('error', 'Sorry,  You must be logged in to see the forums. Please login and try again.');
+      redirect(site_url('users/login'));
     }
 
-    // Load dependencies
-    $this->load->models(array('forums_m', 'posts_m', 'subscriptions_m'));
+    $this->load->models(array('forumsbase_m', 'forums_m', 'subscriptions_m', 'posts_m'));
+
     $this->load->helper('smiley');
     $this->lang->load('forums');
     $this->load->config('forums');
 
-    if(!Settings::get('forums_editor')) {
-      $this->forums_m->add_setting();
-    }
-
-    $this->load->helper(Settings::get('forums_editor'));
-
-    // Set Template Settings
+    // turn off Lex
     $this->template->enable_parser_body(FALSE);
 
-    //$this->template->set_module_layout('default');
+    // if they're using the basic settings, we'll add the basic CSS
+    // file.  Otherwise, the code will be written to depend on the
+    // css file in the theme.
+    if (Settings::get('forums_framework_support') == 'basic')
+    {
+      // add basic CSS file
+      $this->template->append_css('module::forums.css');
+    }
 
-		$this->template->append_css('module::forums.css');
-		$this->template->append_js('module::forums.js');
+    // we make need to worry about including this later
+    // but leaving it in the wild for now.
+    $this->template->append_js('module::forums.js');
+
     $this->template->set_breadcrumb('Home', '/')
-      ->set_breadcrumb('Forums', 'forums');
+                   ->set_breadcrumb('Forums', 'forums');
+
   }
 
   /**
@@ -105,7 +131,7 @@ class Topics extends Public_Controller {
     $this->template->title($topic->title);
     $this->template->set_breadcrumb($forum->title, 'forums/view/'.$forum->id);
     $this->template->set_breadcrumb($topic->title);
-    $this->template->build('posts/view', $data);
+    $this->template->build($this->framework . 'posts/view', $data);
   }
 
 
@@ -172,11 +198,10 @@ class Topics extends Public_Controller {
     $data->forum =& $forum;
     $data->topic =& $topic;
 
-    $this->template->set_partial('buttons', 'partials/buttons');
 
     $this->template->set_breadcrumb($forum->title, 'forums/view/'.$forum->id);
     $this->template->set_breadcrumb('New Topic');
-    $this->template->build('posts/new_topic', $data);
+    $this->template->build($this->framework . 'posts/new_topic', $data);
   }
 
   function stick($topic_id) {

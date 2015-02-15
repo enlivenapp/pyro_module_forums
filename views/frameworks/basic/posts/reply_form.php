@@ -29,10 +29,6 @@
     </thead>
     <tbody>
         <tr>
-            <th>Formatting:</th>
-            <td><?php echo $template['partials']['buttons']; ?></td>
-        </tr>
-        <tr>
             <th class ="textarea_label">Message:</th>
             <td>
                 <?php echo form_textarea(array('name' => 'content', 'id' => 'forum_input', 'value' => $reply->content)); ?>
@@ -48,6 +44,10 @@
         <tr>
             <td>&nbsp;</td>
             <td class="form_buttons"><input type="submit" name="preview" value="Preview" />&nbsp;<input type="submit" name="submit" class="submit" value="Submit Reply" /></td>
+        </tr>
+        <tr>
+            <th>Formatting:</th>
+            <td>some instructions here....</td>
         </tr>
     </tbody>
 </table>

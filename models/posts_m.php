@@ -223,10 +223,10 @@ class Posts_m extends ForumsBase_m {
                 'limit' => 1
             )
         );
-
         $latest_post = reset($latest_post['entries']);
         $topic = $this->get_topic($latest_post['parent_id']);
-        $latest_post['title'] = $topic->title;
+        print_r($topic);
+        $latest_post['title'] = $topic['title'];
 
         return $latest_post;
     }

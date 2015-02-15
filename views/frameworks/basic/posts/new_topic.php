@@ -26,10 +26,6 @@
 			<td><?php echo form_input(array('name' => 'title', 'id' => 'title', 'value' => htmlentities(set_value('title')))); ?><?php echo form_error('title', '<p class="form_error">', '</p>'); ?></td>
 		</tr>
 		<tr>
-			<th>Formatting:</th>
-			<td><?php echo $template['partials']['buttons']; ?></td>
-		</tr>
-		<tr>
 			<th class ="textarea_label">Message:</th>
 			<td><?php echo form_textarea(array('name' => 'content', 'id' => 'forum_input', 'value' => set_value('content'))); ?><?php echo form_error('content', '<p class="form_error">', '</p>'); ?></td>
 		</tr>
@@ -42,6 +38,10 @@
 		<tr>
 			<td>&nbsp;</td>
 			<td class="form_buttons"><input type="submit" name="preview" value="Preview" />&nbsp;<input type="submit" name="submit" class="submit" value="Submit Topic" /></td>
+		</tr>
+		<tr>
+			<th>Formatting Guide</th>
+			<td>Markdown...Puttin it here for now...  maybe a jquery popup or someother page with a _blank target...</td>
 		</tr>
 	</tbody>
 </table>
