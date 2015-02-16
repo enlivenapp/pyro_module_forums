@@ -1,6 +1,8 @@
-Forum Module v2.0.0-dev
+## Forum Module v2.0.0-dev - UNSTABLE
 
-### Native Forum Module for PyroCMS
+#### Description
+
+Native Forum Module for [PyroCMS 2-2.x](http://www.pyrocms.com)
 
 #### PyroCMS Compatibility
 * 3.0   - No 
