@@ -163,7 +163,7 @@ class Posts extends Public_Controller {
 		$data = new stdClass();
 
     // Can't reply if you aren't logged it
-    $this->ion_auth->logged_in() or redirect('users/login');
+    is_logged_in() or redirect('users/login');
 
     // Get the topic and forum info
     $topic = $this->posts_m->get_topic($topic_id);
@@ -285,7 +285,7 @@ class Posts extends Public_Controller {
 		$data  = new stdClass();
 	
     // Can't edit if you aren't logged in
-    $this->ion_auth->logged_in() or redirect('users/login');
+    is_logged_in() or redirect('users/login');
 
     // Get the reply info
     $reply = $this->posts_m->get($reply_id);
@@ -403,7 +403,7 @@ class Posts extends Public_Controller {
   public function delete_reply($reply_id)
   {
     // You gotta be logged in
-    $this->ion_auth->logged_in() or redirect('users/login');
+    is_logged_in() or redirect('users/login');
 
     // Get the reply
     $reply = $this->posts_m->get($reply_id);
@@ -412,7 +412,6 @@ class Posts extends Public_Controller {
     //($reply->parent_id == 0 && !$this->ion_auth->is_admin()) or show_404();
 
     // Chech if it is the user's reply or if admin
-    //print_r($reply);
     ($this->current_user->id && $reply->created_by) or $this->ion_auth->is_admin() or show_404();
 
     // Delete the post
@@ -447,7 +446,7 @@ class Posts extends Public_Controller {
     }
     else
     {
-      $this->session->set_flashdata('success', 'Thank you for reporting this post.  We will review it and act on it according to our Terms of Use/Privacy Policy.');
+      $this->session->set_flashdata('success', 'Thank you for reporting this post.  We will review it and act on it as needed.');
     }
 
 	  

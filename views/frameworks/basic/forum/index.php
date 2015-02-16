@@ -31,12 +31,14 @@
         <td class="center_col">
           <?php echo $forum->reply_count; ?>
         </td>
-        <td class="lastpost_info">
+        <td class="lastpost_info center_col">
         <?php if(isset($forum->last_post['title'])):?>
           <?php echo anchor('forums/posts/view_reply/'.$forum->last_post['id'], $forum->last_post['title']); ?><br/>
 		        {{ helper:date format="M j Y | g:i a" timestamp="<?php echo $forum->last_post['created'] ?>"}}<br/>
 		        Author: <?php echo $forum->last_post['created_by']['display_name']; ?>
-        <?php endif;?>
+          <?php else: ?>
+            <b>- No Posts -</b>
+          <?php endif?>
         </td>
       </tr>
     <?php endforeach; ?>

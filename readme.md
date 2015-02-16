@@ -2,7 +2,7 @@
 
 #### Description
 
-Native Forum Module for [PyroCMS 2-2.x](http://www.pyrocms.com)
+Native Forum Module for [PyroCMS 2.2.x](http://www.pyrocms.com)
 
 #### PyroCMS Compatibility
 * 3.0   - No 
@@ -19,7 +19,7 @@ Native Forum Module for [PyroCMS 2-2.x](http://www.pyrocms.com)
 * Contact: http://enlivenapp.com/contact
 
 #### Contributors
-* Marko Gruter
+* [Marko Gruter](https://github.com/marcogrueter)
 
 
 *Interested in contributing?  Open an issue tracker or submit a pull request. (don't forget to add your name to this file)*
@@ -33,13 +33,13 @@ Native Forum Module for [PyroCMS 2-2.x](http://www.pyrocms.com)
   - install via admin panel.
 
 #### ToDo
-  - (Done) (Implemented) Settings: allow access to forums for logged in/not logged in as chosen by site admin
   - (Done) (Not *completely* implemented) Convert to streams (done by Mark)
   - (Done) (Implemented) (Only Basic is complete) Update views to use Bootstrap and/or other CSS (IE: lose the tables layout)
   - (NOPE) Drag and drop to reorder categories and Forums (Currently, first in = top of list, last in = bottom of list)
   - (Done) (Needs implemtation) Add moderator functionality 
   - (Done) (Needs file purging) loose latex and bbcode
   - (Done) (Some Bugs) add markdown support
+  - MUCH more language files support
 
 
 #### Change Log 
@@ -50,6 +50,7 @@ v2.0.0-dev - Currently under developement
  - Implemented Markdown (replaces BBCode and LaTeX)
  - Installed front end framework (Basic, Bootstrap 3, etc)
  - Setting now allow choice of any public user or only logged in users to see forums
+ - Dropped views/layout/* and views/partials/* as they're no longer used.
 
 
 v1.5.1 - 5/13/14

@@ -24,7 +24,7 @@ class Forums extends Public_Controller {
       // oops
       $this->session->set_flashdata('error', 'Sorry,  You must be logged in to see the forums. Please login and try again.');
       
-      // uri_segments() allows the user to be redirected back
+      // uri_string() allows the user to be redirected back
       // to the original URL once they've logged in
       redirect(site_url('users/login/' . uri_string()));
     }
