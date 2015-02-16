@@ -1,5 +1,5 @@
 
-<?php echo form_open(uri_string()); ?>
+<?php echo form_open(site_url('forums/posts/new_reply/' . $topic->id)); ?>
 
 <?php if( !empty($messages['error']) ): ?>
 <div class="errors">

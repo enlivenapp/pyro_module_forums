@@ -44,10 +44,14 @@ class Posts extends Public_Controller {
     // added in 2.0.0  ability for admin to choose if
     // users must be logged in or if the public at-large
     // can see the forums without loggin in.
-    if (!is_logged_in() && Setttings::get('forums_not_logged_in_access') == 'no')
+    if (!is_logged_in() && Settings::get('forums_not_logged_in_access') == 'no')
     {
+      // oops
       $this->session->set_flashdata('error', 'Sorry,  You must be logged in to see the forums. Please login and try again.');
-      redirect(site_url('users/login'));
+      
+      // uri_segments() allows the user to be redirected back
+      // to the original URL once they've logged in
+      redirect(site_url('users/login/' . uri_string()));
     }
 
     $this->load->models(array('forumsbase_m', 'forums_m', 'posts_m', 'subscriptions_m'));
@@ -118,7 +122,9 @@ class Posts extends Public_Controller {
   /**
    * Quote Reply
    *
-   * Stores the quote of $post_id in flashdata then redirects to edit_reply.
+   * XXX Stores the quote of $post_id in flashdata then redirects to edit_reply.
+   *
+   * Collects needed info and calls rew_reply
    *
    * @param	int	$post_id	Id of the post to quote
    * @access	public
@@ -130,13 +136,14 @@ class Posts extends Public_Controller {
     ($quote = $this->posts_m->get_post($post_id)) || show_404();
 
     // Put the quote in the flashdata.
-    $this->session->set_flashdata('forum_quote', serialize($quote));
+    //$this->session->set_flashdata('forum_quote', serialize($quote));
 		
     // Det the topic's id
     $topic_id = $quote->parent_id > 0 ? $quote->parent_id : $quote->id;
 		
     // Redirect to the normal reply form. It will pick the quote up
-    redirect('forums/posts/new_reply/'.$topic_id);
+    self::new_reply($topic_id, $quote); 
+    //redirect('forums/posts/new_reply/'.$topic_id);
   }
 
   /**
@@ -145,10 +152,11 @@ class Posts extends Public_Controller {
    * Displays new reply form and adds reply to topic
    *
    * @param	int	$topic_id	Id of the topic to reply too
+   * @param obj $quote - text being quoted
    * @access	public
    * @return	void
    */
-  public function new_reply($topic_id = 0)
+  public function new_reply($topic_id = 0, $quote = null)
   {
 
 		$reply = new stdClass();
@@ -165,24 +173,19 @@ class Posts extends Public_Controller {
     ($topic and $forum) or show_404();
 
     // If it's a quote reply get the flashdata
-    if($this->session->flashdata('forum_quote'))
-      {
-	$quote = unserialize($this->session->flashdata('forum_quote'));
-
-	if(Settings::get('forums_editor') == 'bbcode')
-	  {
-	    $reply->content = '[quote]'.$quote->content.'[/quote]';
+    if ($quote)
+    {
+      // this is not the best solution, but it kinda works with the 
+      // markdown.  The blockquote ">" charcter is not working on my
+      // machine.  :(
+      $reply->content = "    Quote: \n\n" . preg_replace( "/[\n\r]/", "\n\r    ", "    " . $quote->content) . "\n\r --- \n\r\n\r";
+      unset($quote);
 	  }
-	elseif(Settings::get('forums_editor') == 'textile')
-	  {
-	    $reply->content = 'bq..  '.$quote->content . "\n\n";
-	  }
-   }
-    // If not a reply jsut set the content to the form validation value
+    // If not a reply just set the content to the form validation value
     else
-      {
-				$reply->content = $this->input->post('content');
-      }
+    {
+      $reply->content = $this->input->post('content');
+    }
 
     // Default's notify based on if the user is subscribed already
     $reply->notify = $this->subscriptions_m->is_subscribed($this->current_user->id, $topic_id);
@@ -409,7 +412,8 @@ class Posts extends Public_Controller {
     //($reply->parent_id == 0 && !$this->ion_auth->is_admin()) or show_404();
 
     // Chech if it is the user's reply or if admin
-    ($this->current_user->id && $reply->author_id) or $this->ion_auth->is_admin() or show_404();
+    //print_r($reply);
+    ($this->current_user->id && $reply->created_by) or $this->ion_auth->is_admin() or show_404();
 
     // Delete the post
     $this->posts_m->delete($reply_id);

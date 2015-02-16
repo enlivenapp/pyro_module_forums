@@ -60,8 +60,12 @@ class Topics extends Public_Controller {
     // can see the forums without loggin in.
     if (!is_logged_in() && Setttings::get('forums_not_logged_in_access') == 'no')
     {
+      // oops
       $this->session->set_flashdata('error', 'Sorry,  You must be logged in to see the forums. Please login and try again.');
-      redirect(site_url('users/login'));
+      
+      // uri_segments() allows the user to be redirected back
+      // to the original URL once they've logged in
+      redirect(site_url('users/login/' . uri_string()));
     }
 
     $this->load->models(array('forumsbase_m', 'forums_m', 'subscriptions_m', 'posts_m'));

@@ -1,9 +1,8 @@
-Forum Module v1.5.1
+Forum Module v2.0.0-dev
 
-Native Forum Module for PyroCMS
+### Native Forum Module for PyroCMS
 
-
--- PyroCMS Compatibility --
+#### PyroCMS Compatibility
 3.0   - No 
 2.3   - No (It's dead Jim)
 2.2.x - Yes
@@ -11,34 +10,45 @@ Native Forum Module for PyroCMS
 < 2.1.x - Unknown, probably not.
 
 
--- Maintaining Author --
+#### Maintaining Author 
 
 visit: https://github.com/wbc-mike/pyro_module_forums
 Issues: https://github.com/wbc-mike/pyro_module_forums/issues
 Contact: http://enlivenapp.com/contact
 
+#### Contributors
+* Marko Gruter
+
+
 Interested in contributing?  Open an issue tracker or submit a pull request. (don't forget to add your name to this file)
 
 
--- Installation --
+#### Installation
 
   - Download to local disk
   - decompress and name resulting folder "forums" (Optional,  recompress and save file as forums.zip)
   - place in addons/<site_ref>/modules/  OR addons/shared_addons/modules/ OR (if recompressed) upload via control panel
   - install via admin panel.
 
--- ToDo --
-  x Settings: allow access to forums for logged in/not logged in as chosen by site admin
-  - Convert to streams (done by Mark)
-  x Update views to use Bootstrap and/or other CSS (IE: lose the tables layout)
-  x Drag and drop to reorder categories and Forums (Currently, first in = top of list, last in = bottom of list)
-  x Add moderator functionality (currently, it's site admin or nothing.  Most don't want to give that kind of access to just anyone)
-  x loose latex and bbcode
-  x add markdown support
-  - add permissions (In progress - Mike)
+#### ToDo
+  x (Done) (Implemented) Settings: allow access to forums for logged in/not logged in as chosen by site admin
+  x (Done) (Not *completely* implemented) Convert to streams (done by Mark)
+  x (Done) (Implemented) (Only Basic is complete) Update views to use Bootstrap and/or other CSS (IE: lose the tables layout)
+  x (NOPE) Drag and drop to reorder categories and Forums (Currently, first in = top of list, last in = bottom of list)
+  x (Done) (Needs implemtation) Add moderator functionality 
+  x (Done) (Needs file purging) loose latex and bbcode
+  x (Done) (Some Bugs) add markdown support
 
 
--- Change Log --
+#### Change Log 
+v2.0.0-dev - Currently under developement
+ - Converted to Streams
+ - Added permissions for Mods
+ - Dropped BBCode and LaTeX
+ - Implemented Markdown (replaces BBCode and LaTeX)
+ - Installed front end framework (Basic, Bootstrap 3, etc)
+ - Setting now allow choice of any public user or only logged in users to see forums
+
 
 v1.5.1 - 5/13/14
   - Update this file
@@ -52,14 +62,12 @@ v1.5.0 - 9/9/13
     - removed $this->data
     - a few other little thing that were done pre-v2 that was depreciated
 
--- Contributors --
-None Yet...
 
 
 Update from v1.0 for PyroCMS 2.1.x
 
 
--- Original Readme and Author information --
+### Original Readme and Author information
 
 ----
 PyroCMS v2.1.x Forum Module - 07-07-2012

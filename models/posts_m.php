@@ -261,7 +261,12 @@ class Posts_m extends ForumsBase_m {
     */
 
     // how the hell does the caller know that this is a topic without getting the infos first?
-    // magic?  -Mike
+
+    // It's passed by URL. So far I've found, via quote button(reply)
+    // see posts controller: line 165
+    // -> $topic = $this->posts_m->get_topic($topic_id);  
+    // -Mike
+
     function get_topic($topic_id = 0)
     {
         return $this->get_entry($topic_id, false);
