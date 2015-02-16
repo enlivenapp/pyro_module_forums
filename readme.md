@@ -3,24 +3,24 @@ Forum Module v2.0.0-dev
 ### Native Forum Module for PyroCMS
 
 #### PyroCMS Compatibility
-3.0   - No 
-2.3   - No (It's dead Jim)
-2.2.x - Yes
-2.1.x - Possibly (please report)
-< 2.1.x - Unknown, probably not.
+* 3.0   - No 
+* 2.3   - No (It's dead Jim)
+* 2.2.x - Yes
+* 2.1.x - Possibly (please report)
+* < 2.1.x - Unknown, probably not.
 
 
 #### Maintaining Author 
 
-visit: https://github.com/wbc-mike/pyro_module_forums
-Issues: https://github.com/wbc-mike/pyro_module_forums/issues
-Contact: http://enlivenapp.com/contact
+* visit: https://github.com/wbc-mike/pyro_module_forums
+* Issues: https://github.com/wbc-mike/pyro_module_forums/issues
+* Contact: http://enlivenapp.com/contact
 
 #### Contributors
 * Marko Gruter
 
 
-Interested in contributing?  Open an issue tracker or submit a pull request. (don't forget to add your name to this file)
+*Interested in contributing?  Open an issue tracker or submit a pull request. (don't forget to add your name to this file)*
 
 
 #### Installation
@@ -31,13 +31,13 @@ Interested in contributing?  Open an issue tracker or submit a pull request. (do
   - install via admin panel.
 
 #### ToDo
-  x (Done) (Implemented) Settings: allow access to forums for logged in/not logged in as chosen by site admin
-  x (Done) (Not *completely* implemented) Convert to streams (done by Mark)
-  x (Done) (Implemented) (Only Basic is complete) Update views to use Bootstrap and/or other CSS (IE: lose the tables layout)
-  x (NOPE) Drag and drop to reorder categories and Forums (Currently, first in = top of list, last in = bottom of list)
-  x (Done) (Needs implemtation) Add moderator functionality 
-  x (Done) (Needs file purging) loose latex and bbcode
-  x (Done) (Some Bugs) add markdown support
+  - (Done) (Implemented) Settings: allow access to forums for logged in/not logged in as chosen by site admin
+  - (Done) (Not *completely* implemented) Convert to streams (done by Mark)
+  - (Done) (Implemented) (Only Basic is complete) Update views to use Bootstrap and/or other CSS (IE: lose the tables layout)
+  - (NOPE) Drag and drop to reorder categories and Forums (Currently, first in = top of list, last in = bottom of list)
+  - (Done) (Needs implemtation) Add moderator functionality 
+  - (Done) (Needs file purging) loose latex and bbcode
+  - (Done) (Some Bugs) add markdown support
 
 
 #### Change Log 
@@ -69,6 +69,7 @@ Update from v1.0 for PyroCMS 2.1.x
 
 ### Original Readme and Author information
 
+----
 ----
 PyroCMS v2.1.x Forum Module - 07-07-2012
 visit: http://www.cavaencoreparlerdebits.fr
