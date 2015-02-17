@@ -50,6 +50,17 @@ class Module_Forums extends Module {
               ),
             ),
           ),
+          'permissions' => array(
+            'name' => 'forums:permissions',
+            'uri' => 'admin/forums/permissions',
+            'shortcuts' => array(
+              array(
+                'name'  => 'forums:create_perms_title',
+                'uri'   => 'admin/forums/create_permissions',
+                'class' => 'add'
+              ),
+            ),
+          ),
         )
       );
     }

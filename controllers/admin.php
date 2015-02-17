@@ -82,9 +82,11 @@ class Admin extends Admin_Controller {
 
         $this->load->model('forums_m');
 
+        
+
         $extra = array(
             'columns' => array('title', 'description', 'category_id', 'created_by', 'created'),
-            'title' => 'lang:forums:categories',
+            'title' => 'lang:forums:forums',
             'buttons' => array(
                 array(
                     'label'     => lang('global:edit'),
